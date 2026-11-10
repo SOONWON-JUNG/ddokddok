@@ -1,0 +1,15 @@
+{
+  "name": "똑똑 — 교수님, 저희 왔어요!",
+  "short_name": "똑똑",
+  "description": "전경란 교수님 총장 취임 축하 웹게임",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#14121c",
+  "theme_color": "#14121c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

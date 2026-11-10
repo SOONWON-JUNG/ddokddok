@@ -1,0 +1,21 @@
+{
+  "name": "ddokddok",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --port 5173",
+    "build": "tsc --noEmit && vite build",
+    "build:single": "tsc --noEmit && vite build --mode single && node scripts/single-file.mjs",
+    "preview": "vite preview --host --port 4173",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0"
+  },
+  "description": "똑똑 (ddokddok) - 전경란 교수님 총장 취임 축하 웹게임"
+}
