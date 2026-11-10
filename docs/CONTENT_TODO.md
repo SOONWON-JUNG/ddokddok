@@ -19,6 +19,8 @@
 | `door_702` | 702호 앞(시간표 설명) | 시간표 특징(화·수·목) 반영, 문구는 임시 | 임시 |
 | `office_intro` | 702호 처음 들어섰을 때 | 임시 | 임시 |
 | `red_pen` / `papers_done` | 702호 물건들 | 임시 | 임시 |
+| `ch_ev_*` / `hall_chick_after` | 복도 창현 "교수님 오인 소동"(과제 폭탄 + 면도) | 임시(제가 쓴 문구) | 현서님이 수정 |
+| `fight_intro` / `fight_after` / `hs_fallen` / `senior_703` / 카드 `bracket_703` | 703호 닭싸움, 넘어진 현서와 대화(교수님 반말), 대진표 | 임시(제가 쓴 문구) | 현서님이 수정 |
 | `taejin_dance` / 카드 `poster_ucdc` | 701호 UCDC 태진 대화, 공연 포스터 | 임시(제가 쓴 문구) | 현서님이 수정 |
 | `scared_*` / `bush_sound` / `puppy_hello` / `garden_dig_done` | 이상한 소리 퀘스트(신입생, 강아지) | 임시(제가 쓴 문구) | 현서님이 수정 |
 | `chest_start` / `chest_msg` / `chest_after` | 보물상자와 마지막 축하 메시지 | 임시 | 임시 |

@@ -23,6 +23,7 @@ src/
     hall.ts                  산학협력관 복도(게시판, 701·702·703호)
     office.ts                702호 연구실
     room701.ts               701호 댄스 동아리 UCDC 연습실 (춤추는 병아리 태진)
+    room703.ts               703호 체육대회 닭싸움 결승전 (병아리 현서 vs 황소 선배)
     garden.ts                비밀 정원(보물상자)
     types.ts                 장소 데이터의 형식 설명
   scenes/

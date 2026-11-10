@@ -166,6 +166,9 @@ export function buildOutdoor(): MapData {
       w: 2,
       h: 1,
       approach: { tx: 7, ty: 35 },
+      // 피자 배달부 이벤트를 먼저 본 뒤에 들어갈 수 있다
+      requires: 'pizza_done',
+      lockedText: '건물 앞에서 피자 배달부가 두리번거리고 있다.\n들어가기 전에 무슨 일인지 먼저 물어볼까?',
       action: { type: 'door', toMap: 'hall', toSpawn: 'from_outdoor', set: { entered_building: true } },
     },
     {
@@ -372,7 +375,7 @@ export function buildOutdoor(): MapData {
     zones,
     // 본관 앞 2026년(현재) → 비탈길을 내려가며 과거로 → 산학협력관 앞 2006년. 올라가면 다시 현재로.
     timeline: { kind: 'path', line: PATH, from: 2026, to: 2006 },
-    links: { hall: { tx: 7, ty: 34 }, office: { tx: 7, ty: 34 }, garden: { tx: 54, ty: 28 } },
+    links: { hall: { tx: 7, ty: 34 }, office: { tx: 7, ty: 34 }, room701: { tx: 7, ty: 34 }, room703: { tx: 7, ty: 34 }, garden: { tx: 54, ty: 28 } },
     spawns: {
       start: { tx: 50, ty: 13, facing: 'down' }, // 본관 앞 (이야기 시작)
       from_hall: { tx: 7, ty: 35, facing: 'down' }, // 산학협력관 문 앞

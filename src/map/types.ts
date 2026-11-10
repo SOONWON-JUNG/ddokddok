@@ -50,6 +50,10 @@ export interface Interactable {
   h?: number;
   /** 그려질 스프라이트 (없으면 보이지 않는 영역, 예: 건물 문) */
   texture?: string;
+  /** NPC 그림을 기울이는 각도(도). 예: -90 이면 옆으로 누워 있다 */
+  angle?: number;
+  /** NPC 그림 크기 배율 (황소 선배 1.3) */
+  scale?: number;
   /** true 면 제자리에서 쉬지 않고 브레이크 댄스를 춘다 (701호 태진). 말을 걸면 잠시 멈춘다 */
   dance?: boolean;
   /** true 면 가까이 가지 않아도 머리 위에 느낌표가 계속 떠 있다 (이상한 소리가 나는 수풀 등) */
@@ -73,9 +77,11 @@ export interface Interactable {
   altTexture?: { flag: string; texture: string };
   /** 위아래로 둥실 떠 있는 연출 (아이템용) */
   float?: boolean;
-  /** 이 플래그가 켜져야 사용 가능 */
-  requires?: string;
+  /** 이 플래그가 (여러 개면 모두) 켜져야 사용 가능 */
+  requires?: string | string[];
   lockedText?: string;
+  /** requires 중 아직 안 켜진 플래그마다 덧붙여 보여 줄 안내 (예: "701호에서 음악 소리가 난다") */
+  lockedHints?: Record<string, string>;
   action: InteractAction;
 }
 
@@ -135,7 +141,7 @@ export interface MapData {
   /** 이 맵에서 흐르는 BGM */
   music: BgmName;
   /** 실내 바닥/벽 스타일: wood(연구실), hall(복도) */
-  style?: 'wood' | 'hall' | 'dance';
+  style?: 'wood' | 'hall' | 'dance' | 'gym' | 'field';
   /** 꽃 장식 개수 (야외). 기본 260 */
   flowerCount?: number;
   /** 다른 맵에 있는 목표를 향할 때 이 맵에서 가야 할 문 위치 (화살표 안내용) */

@@ -210,7 +210,44 @@ export const SCRIPTS: Record<string, Script> = {
   hall_chick: {
     start: { text: '박성대 교수님과 병아리 한 마리가 마주 보고 이야기하고 있다.\n가만히 귀를 기울여 보자.\n\n[의문의 병아리]', next: 'a' },
     a: { speaker: '박성대 교수님', portrait: 'prof_ps', text: '어? 새로 오신 교수님이세요?', next: 'b' },
-    b: { speaker: '창현', portrait: 'chick_ch', text: '……저 학생인데요.' },
+    b: { speaker: '창현', portrait: 'chick_ch', text: '……저 학생인데요.', set: { ch_talked: true } },
+  },
+  // 복도 "교수님 오인 소동" (창현 이벤트)
+  ch_ev_intro: {
+    start: { speaker: '박성대 교수님', portrait: 'prof_ps', text: '그래도 이 수염이면… 어딜 봐도 교수님이신데.', next: 'b' },
+    b: { speaker: '창현', portrait: 'chick_ch', text: '아니라니까요! 저 06학번이에요!', next: 'c' },
+    c: { text: '그때, 복도 저쪽에서 병아리 신입생들이 우르르 달려온다.' },
+  },
+  ch_ev_fresh: {
+    start: { speaker: '신입생 병아리', portrait: 'chick_fresh', text: '교수님! 과제 제출합니다!', next: 'b' },
+    b: { speaker: '신입생 병아리', portrait: 'chick_fresh', text: '저도요! 늦어서 죄송합니다, 교수님!', next: 'c' },
+    c: { speaker: '신입생 병아리', portrait: 'chick_fresh', text: '교수님 수염 너무 멋있으세요! 과제 여기 있습니다!', next: 'd' },
+    d: { speaker: '창현', portrait: 'chick_ch', text: '아니, 잠깐만, 나 교수 아니…' },
+  },
+  ch_ev_pile: {
+    start: { text: '와르르—! 과제 더미 사이로 수염만 삐죽 나와 있다.', next: 'b' },
+    b: { speaker: '교수님', portrait: 'professor', text: '창현아, 괜찮니? …채점은 내가 해 줄게.' },
+  },
+  ch_ev_shave1: {
+    start: { speaker: '창현', portrait: 'chick_ch', text: '이게 다 이 수염 때문이에요! 학생인 걸 증명하겠습니다!', next: 'b' },
+    b: { text: '창현이 주머니에서 면도기를 꺼냈다. 쓱싹쓱싹—' },
+  },
+  ch_ev_shave2: {
+    start: { speaker: '창현', portrait: 'chick_ch', text: '어때요! 이제 누가 봐도 풋풋한 06학번 새내기죠?' },
+  },
+  ch_ev_shave3: {
+    start: { text: '뿅!', next: 'b' },
+    b: { speaker: '창현', portrait: 'chick_ch', text: '…어? 다시 났는데요? 아까보다 더? 한 번 더!' },
+  },
+  ch_ev_end: {
+    start: { text: '뿅!! 수염이 바닥까지 자라났다.', next: 'b' },
+    b: { speaker: '박성대 교수님', portrait: 'prof_ps', text: '아… 명예교수님이셨구나. 몰라뵈어 죄송합니다.', next: 'c' },
+    c: { speaker: '창현', portrait: 'chick_ch_beard3', text: '……저 그냥 학생으로 살고 싶어요.', next: 'd' },
+    d: { speaker: '교수님', portrait: 'professor', text: '창현아, 그 수염도 잘 어울려. 아주… 학자 같아.' },
+  },
+  hall_chick_after: {
+    start: { speaker: '창현', portrait: 'chick_ch_beard3', text: '교수님… 수염은 내일 다시 밀어 볼게요. 아마 더 자라겠지만요.', next: 'b' },
+    b: { speaker: '박성대 교수님', portrait: 'prof_ps', text: '명예교수님, 이따 차 한잔 하시죠.' },
   },
   // ── 701호: 댄스 동아리 UCDC 연습실, 브레이크 댄스 추는 병아리 태진 ──
   taejin_dance: {
@@ -219,6 +256,7 @@ export const SCRIPTS: Record<string, Script> = {
       next: 'a',
     },
     a: {
+      set: { taejin_talked: true },
       speaker: '태진',
       portrait: 'chick_ty',
       text: '어?! 교수님! (헤드스핀 하다 벌떡) 이, 이건 땡땡이가 아니라… "신체 활동을 통한 창의성 연구"입니다!',
@@ -275,7 +313,69 @@ export const SCRIPTS: Record<string, Script> = {
     try5: { speaker: '교수님', portrait: 'professor', text: '…잘한다. 과제 안 낸 학생 중에서는 제일 잘해...', next: 'try6' },
     try6: { speaker: '태진', portrait: 'chick_ty', text: '감사합니다! 오늘 연습은 이걸로 A+ 받은 걸로 하겠습니다! (다시 빙글빙글)' },
   },
-  door_703: { start: { text: '703호. 안쪽이 조용하다. 지금은 아무도 없는 것 같다.' } },
+  // ── 703호: 체육대회 닭싸움 결승전 (교수님은 현서에게 반말) ──
+  fight_intro: {
+    start: { text: '703호 문을 열자 함성이 쏟아진다!\n"청군 이겨라! 백군 이겨라!"', next: 'b' },
+    b: {
+      text: '체육대회 닭싸움 결승전.\n병아리 현서와… 덩치가 세 배는 되어 보이는 황소 선배가 한 발로 마주 섰다.',
+      next: 'c',
+    },
+    c: { speaker: '현서', portrait: 'chick_hs', text: '선배! 오늘은 제가 이깁니다! 작전이 다 있어요!', next: 'd' },
+    d: { speaker: '황소 선배', portrait: 'bull_senior', text: '그래? 살살 할게. 진짜 살살.' },
+  },
+  fight_after: {
+    start: { text: '쿵! …현서 병아리가 공중제비를 세 바퀴 돌아 저 멀리 대자로 떨어졌다.', next: 'b' },
+    b: { text: '머리 위로 작은 별이 빙글빙글 돈다.' },
+  },
+  hs_fallen: {
+    start: { text: '현서 병아리가 바닥에 대자로 뻗은 채 천장을 보고 있다.', next: 'a' },
+    a: { speaker: '교수님', portrait: 'professor', text: '현서야, 괜찮니? 방금 엄청 멀리 날아가던데.', next: 'b', set: { hs_talked: true } },
+    b: {
+      speaker: '현서',
+      portrait: 'chick_hs',
+      text: '교수님… 저 방금 하늘을 날았어요. 병아리도 날 수 있다는 걸 오늘 처음 알았어요.',
+      next: 'c',
+    },
+    c: { speaker: '교수님', portrait: 'professor', text: '그건 난 게 아니라 날아간 거야.', next: 'd' },
+    d: { speaker: '현서', portrait: 'chick_hs', text: '…과학적으로 같은 거 아닌가요?', next: 'e' },
+    e: { speaker: '교수님', portrait: 'professor', text: '착지가 다르잖아.', next: 'f' },
+    f: {
+      speaker: '현서',
+      portrait: 'chick_hs',
+      text: '작전은 완벽했어요. 선배가 무릎을 드는 순간 밑으로 파고들려고 했는데… 선배 무릎이 제 키보다 높았어요.',
+      choices: [
+        { label: '다음엔 이길 수 있겠어?', next: 'n1' },
+        { label: '그만 일어나자', next: 'r1' },
+      ],
+    },
+    n1: {
+      speaker: '현서',
+      portrait: 'chick_hs',
+      text: '네! 다음 체육대회까지 피자 많이 먹고 체급 올려 오겠습니다!',
+      next: 'n2',
+    },
+    n2: { speaker: '교수님', portrait: 'professor', text: '피자는 내가 사 줄게. 대신 과제부터 내고.', next: 'n3' },
+    n3: { speaker: '현서', portrait: 'chick_hs', text: '…갑자기 다리에 힘이 하나도 없어요. 조금만 더 누워 있을게요.' },
+    r1: { speaker: '교수님', portrait: 'professor', text: '그만 일어나. 손 잡아 줄게.', next: 'r2' },
+    r2: {
+      speaker: '현서',
+      portrait: 'chick_hs',
+      text: '교수님… 저 혼자서는 못 일어나요. 날개가 너무 짧아서 바닥에 안 닿아요.',
+      next: 'r3',
+    },
+    r3: { speaker: '교수님', portrait: 'professor', text: '…그럼 조금만 더 누워 있어. 내가 여기서 응원할게. 현서 파이팅!', next: 'r4' },
+    r4: { speaker: '현서', portrait: 'chick_hs', text: '(누운 채로 날개를 파닥이며) 파이팅…!' },
+  },
+  senior_703: {
+    start: {
+      speaker: '황소 선배',
+      portrait: 'bull_senior',
+      text: '어, 교수님 안녕하세요! 저 진짜 살짝 닿기만 했어요. 진짜예요. 깃털 하나 안 건드렸어요.',
+      next: 'b',
+    },
+    b: { text: '저 멀리서 현서의 깃털 한 가닥이 팔랑팔랑 떨어진다.', next: 'c' },
+    c: { speaker: '황소 선배', portrait: 'bull_senior', text: '…한 가닥은 건드렸네요.' },
+  },
   door_702: {
     start: {
       text: '702호. 전경란 교수님의 연구실.\n문패 아래 시간표는 화·수·목에 빼곡하다. 월요일과 금요일은 텅 비어 있다.',

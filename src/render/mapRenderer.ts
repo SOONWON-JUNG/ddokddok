@@ -182,6 +182,8 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
   const key = `ground_${map.id}`;
   const hall = map.style === 'hall';
   const dance = map.style === 'dance';
+  const gym = map.style === 'gym';
+  const field = map.style === 'field';
   if (!scene.textures.exists(key)) {
     const tex = scene.textures.createCanvas(key, w * TILE, h * TILE)!;
     const ctx = tex.context;
@@ -196,7 +198,23 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
         const px = x * TILE;
         const py = y * TILE;
         if (ground[y][x] === 0) {
-          if (dance) {
+          if (field) {
+            // 학교 잔디 운동장: 깎은 줄무늬 잔디 + 풀잎 + 흰 석회 라인
+            rect(px, py, TILE, TILE, x % 4 < 2 ? '#7cc46a' : '#72b862');
+            if ((x * 7 + y * 13) % 5 === 0) {
+              rect(px + 4, py + 6, 1, 2, '#5ea24f');
+              rect(px + 10, py + 11, 1, 2, '#8fd27a');
+            }
+            if (y === 5 || y === 11) rect(px, py + 7, TILE, 2, '#f7f4ee');
+            if (y === WALL_ROWS) rect(px, py, TILE, 3, 'rgba(0,0,0,0.12)');
+          } else if (gym) {
+            // 체육관 바닥: 노란 원목 + 코트 라인
+            rect(px, py, TILE, TILE, (x + y) % 2 === 0 ? '#eacb8f' : '#e4c487');
+            rect(px, py + TILE - 1, TILE, 1, '#cfa96c');
+            rect(px + 3, py + 3, 3, 1, '#f4dcaa');
+            if (y === 5 || y === 11) rect(px, py + 7, TILE, 2, '#2f6fd0');
+            if (y === WALL_ROWS) rect(px, py, TILE, 5, 'rgba(0,0,0,0.14)');
+          } else if (dance) {
             // 댄스 연습실: 밝은 원목 마루 + 바닥에 붙인 동선 테이프
             rect(px, py, TILE, TILE, y % 2 === 0 ? '#e6c896' : '#dfc08c');
             rect(px, py + TILE - 1, TILE, 1, '#c9a46e');
@@ -223,7 +241,40 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
             if (y === WALL_ROWS) rect(px, py, TILE, 5, 'rgba(0,0,0,0.14)'); // 벽 아래 그림자
           }
         } else if (y < WALL_ROWS && x > 0 && x < w - 1) {
-          if (dance) {
+          if (field) {
+            // 하늘 → 먼 나무 → 흰 울타리 (운동장 가장자리)
+            if (y < 2) {
+              rect(px, py, TILE, TILE, y === 0 ? '#9fd8f6' : '#b8e4fa');
+              if ((x + y) % 7 === 3) {
+                rect(px + 2, py + 6, 10, 3, '#ffffff');
+                rect(px + 4, py + 4, 6, 2, '#ffffff');
+              }
+            } else if (y === 2) {
+              rect(px, py, TILE, TILE, '#b8e4fa');
+              rect(px, py + 6, TILE, 10, '#4f9a5a');
+              for (let k = 0; k < 3; k++) rect(px + k * 6, py + 3 + ((x + k) % 2) * 2, 5, 4, '#4f9a5a');
+              rect(px + 2, py + 8, 3, 2, '#6bb873');
+            } else {
+              rect(px, py, TILE, TILE, '#6cb35c');
+              rect(px, py + 2, TILE, 2, '#f7f4ee'); // 울타리 가로대
+              rect(px, py + 8, TILE, 2, '#f7f4ee');
+              rect(px + 2, py, 2, 13, '#f7f4ee'); // 울타리 기둥
+              rect(px + 10, py, 2, 13, '#f7f4ee');
+              rect(px, py + 13, TILE, 3, '#5ea24f');
+            }
+          } else if (gym) {
+            // 크림색 벽 + 파랑·빨강 띠 (운동회 느낌)
+            rect(px, py, TILE, TILE, '#fbecd0');
+            if (y === 0) rect(px, py, TILE, 3, '#eed7b0');
+            if (y === 2) {
+              rect(px, py + 10, TILE, 3, '#2f6fd0');
+              rect(px, py + 13, TILE, 2, '#d94b3a');
+            }
+            if (y === WALL_ROWS - 1) {
+              rect(px, py + TILE - 5, TILE, 5, '#8d6544');
+              rect(px, py + TILE - 5, TILE, 1, '#b08358');
+            }
+          } else if (dance) {
             // 짙은 보라 벽 + 분홍·하늘 네온 줄 + 검은 걸레받이
             rect(px, py, TILE, TILE, '#2e2448');
             rect(px + 7, py, 1, TILE, '#352a52');
@@ -263,6 +314,14 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
           }
         } else {
           // 옆벽·아래벽
+          if (field) {
+            // 운동장 둘레 울타리 풀숲
+            rect(px, py, TILE, TILE, '#3f7f4a');
+            rect(px + 2, py + 3, 5, 4, '#4f9a5a');
+            rect(px + 9, py + 9, 5, 4, '#4f9a5a');
+            rect(px + 3, py + 4, 2, 1, '#6bb873');
+            continue;
+          }
           rect(px, py, TILE, TILE, dance ? '#2a2238' : hall ? '#6d6a60' : '#6d4a33');
           rect(px, py, TILE, 1, dance ? '#3d3360' : hall ? '#8a877b' : '#8a6247');
           rect(px, py + TILE - 1, TILE, 1, dance ? '#16121f' : hall ? '#4f4d45' : '#523725');

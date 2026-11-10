@@ -12,9 +12,9 @@
  */
 
 /** outdoor=비탈길, hall=복도(702호 앞), office=연구실(회상), paper=교수님 첨삭, garden=보물상자, ending=크레딧 (indoor 는 합성음 예비용) */
-export type BgmName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'hall' | 'office' | 'paper' | 'dance';
+export type BgmName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'hall' | 'office' | 'paper' | 'dance' | 'festival';
 
-type SynthName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'dance';
+type SynthName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'dance' | 'festival';
 
 /** 음원 파일이 없을 때 대신 쓰는 합성음 트랙 */
 const SYNTH_FOR: Record<BgmName, SynthName> = {
@@ -26,6 +26,7 @@ const SYNTH_FOR: Record<BgmName, SynthName> = {
   office: 'indoor',
   paper: 'indoor',
   dance: 'dance',
+  festival: 'festival',
 };
 /** 같은 음원 파일을 함께 쓰는 이름 (크레딧은 보물상자 음악을 끊김 없이 이어서 틀어 준다) */
 const FILE_ALIAS: Partial<Record<BgmName, BgmName>> = { ending: 'garden' };
@@ -43,6 +44,8 @@ export type SfxName =
   | 'pop'
   | 'sparkle'
   | 'bark'
+  | 'thud'
+  | 'whoosh'
   | 'morph';
 
 const midi = (n: number) => 440 * Math.pow(2, (n - 69) / 12);
@@ -80,6 +83,20 @@ function melody(notes: Record<number, number>): (number | null)[] {
 }
 
 const TRACKS: Record<SynthName, Track> = {
+  // 703호 체육대회: 신나는 운동회 행진곡 (C장조)
+  festival: {
+    bpm: 126,
+    steps: 32,
+    lead: melody({ 0: 7, 1: 7, 2: 9, 4: 7, 6: 12, 8: 11, 10: 7, 12: 9, 14: 7, 16: 5, 17: 5, 18: 7, 20: 5, 22: 9, 24: 7, 26: 4, 28: 2, 30: 0 }),
+    bass: bassLine([0, -5, -3, -7]),
+    leadBase: 72,
+    bassBase: 48,
+    leadWave: 'square',
+    bassWave: 'triangle',
+    leadVol: 0.045,
+    bassVol: 0.1,
+    leadLen: 0.9,
+  },
   // 701호 댄스 동아리: 통통 튀는 펑키 비트 (A단조, 엇박 베이스)
   dance: {
     bpm: 112,
@@ -165,6 +182,9 @@ const TRACKS: Record<SynthName, Track> = {
 
 const MUTE_KEY = 'ddokddok.muted';
 
+/** 이벤트 연출용 효과음: 배경음악에 묻히지 않도록 더 크게 낸다 */
+const EVENT_SFX = new Set<SfxName>(['pop', 'morph', 'thud', 'whoosh', 'bark', 'sparkle', 'fanfare', 'chest', 'pickup', 'confirm', 'knock', 'door', 'paper']);
+
 /** 아이패드/아이폰 (아이패드 OS 는 Mac 처럼 보이므로 터치 지점 수로 구분) */
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 /**
@@ -204,6 +224,8 @@ class AudioEngine {
   private master!: GainNode;
   private music!: GainNode;
   private sfxBus!: GainNode;
+  /** 연출 효과음(멍멍, 쿵, 뿅, 반짝…)은 더 크게 들리도록 따로 키운다 */
+  private eventBus!: GainNode;
   private noise: AudioBuffer | null = null;
 
   private muted = false;
@@ -244,9 +266,20 @@ class AudioEngine {
       this.sfxBus = this.ctx.createGain();
       this.music.gain.value = 0.5;
       this.sfxBus.gain.value = 0.9;
+      this.eventBus = this.ctx.createGain();
+      this.eventBus.gain.value = 1.9;
       this.music.connect(this.master);
       this.sfxBus.connect(this.master);
-      this.master.connect(this.ctx.destination);
+      this.eventBus.connect(this.master);
+      // 효과음을 키워도 소리가 찢어지지 않게 마지막에 살짝 눌러 준다
+      const comp = this.ctx.createDynamicsCompressor();
+      comp.threshold.value = -10;
+      comp.knee.value = 8;
+      comp.ratio.value = 4;
+      comp.attack.value = 0.003;
+      comp.release.value = 0.2;
+      this.master.connect(comp);
+      comp.connect(this.ctx.destination);
       this.master.gain.value = this.muted ? 0 : 0.7;
       // 흰 잡음 1초 (발소리, 종이, 문 소리에 사용)
       const buf = this.ctx.createBuffer(1, this.ctx.sampleRate, this.ctx.sampleRate);
@@ -470,7 +503,7 @@ class AudioEngine {
     const ctx = this.ctx;
     if (!ctx || this.muted) return;
     const t = ctx.currentTime;
-    const bus = this.sfxBus;
+    const bus = EVENT_SFX.has(name) ? this.eventBus : this.sfxBus;
     switch (name) {
       case 'blip': // 대화창 글자 소리 (아주 작게)
         this.tone(520 + Math.random() * 80, t, 0.035, 'square', 0.018, bus);
@@ -514,6 +547,13 @@ class AudioEngine {
         [79, 83, 86, 91, 95].forEach((n, i) => this.tone(midi(n), t + i * 0.055, 0.16, 'triangle', 0.09, bus));
         [103, 107, 110].forEach((n, i) => this.tone(midi(n), t + 0.3 + i * 0.05, 0.3, 'sine', 0.05, bus));
         this.burst(t, 0.25, 0.08, 5200, 0.7, 'highpass');
+        break;
+      case 'thud': // 쿵! 부딪히는 소리
+        this.tone(140, t, 0.18, 'sine', 0.6, bus, 50);
+        this.burst(t, 0.12, 0.4, 600, 1, 'lowpass');
+        break;
+      case 'whoosh': // 휘이익 날아가는 소리
+        this.burst(t, 0.6, 0.18, 700, 3, 'bandpass', 2600);
         break;
       case 'bark': // 멍! 멍!
         this.tone(430, t, 0.09, 'sawtooth', 0.1, bus, 250);

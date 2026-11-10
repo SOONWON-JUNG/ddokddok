@@ -16,7 +16,7 @@ export type CutStep =
   /** 플래그 켜기 */
   | { type: 'flag'; set: Flags }
   /** 임시 캐릭터를 투명하게 만들어 둔다 (gather 가 보이게 하며 걷기 시작) */
-  | { type: 'spawn'; id: string; texture: string; at: { tx: number; ty: number }; facing?: Dir; label?: string }
+  | { type: 'spawn'; id: string; texture: string; at: { tx: number; ty: number }; facing?: Dir; label?: string; visible?: boolean; scale?: number }
   /** 폴짝 뛰며 박수 친다 (times 번) */
   | { type: 'clap'; ids: string[]; times?: number }
   /** 캐릭터들이 대상 주변으로 모여든다. stagger(ms) 간격으로 차례로 출발 */
@@ -43,6 +43,14 @@ export type CutStep =
   | { type: 'puppy'; act: 'appear' | 'run' | 'bark' | 'dig' | 'free' | 'transform' | 'sit'; at?: { tx: number; ty: number }; ms?: number }
   /** 캐릭터 모습이 바뀐다 (병아리 → 사람): 반짝 빛, 꽃폭죽, 색종이와 함께 ids[i] 의 그림이 to[i] 로 바뀐다 */
   | { type: 'morph'; ids: string[]; to: string[]; stagger?: number }
+  /** 703호 닭싸움: fight_hs(병아리 현서)와 fight_senior(황소 선배)가 콩콩 다가와 부딪치고, 현서가 멀리 날아가 넘어진다 */
+  | { type: 'chickenFight' }
+  /** 과제 폭탄: from 의 병아리들이 차례로 종이를 target 머리 위에 쌓고, 흔들흔들하다 와르르 무너져 target 을 덮는다 */
+  | { type: 'paperPile'; target: string; from: string[] }
+  /** 덮고 있던 종이 더미를 털고 target 이 튀어나온다 */
+  | { type: 'unpile'; target: string }
+  /** 그림 바꾸기: shave(면도: 반짝 깨끗) / grow(뿅! 하고 자라남) */
+  | { type: 'swap'; id: string; texture: string; fx: 'shave' | 'grow' }
   /** 꽃폭죽이 팡팡 터진다 (대상 머리 위 하늘에서 여러 번) */
   | { type: 'flowers'; at: string; rounds?: number }
   /** 맵을 옮긴다 (화면이 어두워졌다 밝아짐). 이후 단계는 실행되지 않는다 */
@@ -57,6 +65,8 @@ const CHICKS = [
   { id: 'chick_ty', texture: 'chick_ty', label: '태진' },
 ];
 const STUDENTS = CHICKS.map((c) => c.id);
+/** 복도에서 창현에게 과제를 내러 오는 병아리 신입생들 */
+const FRESH = ['chick_f1', 'chick_f2', 'chick_f3'];
 /** 산학협력관 문 앞(학생들이 나오는 곳) */
 const DOOR = { tx: 7, ty: 35 };
 
@@ -147,6 +157,45 @@ export const CUTSCENES: Record<string, CutStep[]> = {
     { type: 'puppy', act: 'run', at: { tx: 52, ty: 30 } },
     { type: 'say', script: 'garden_dig_done' },
     { type: 'puppy', act: 'free' },
+  ],
+
+  // 703호 체육대회: 닭싸움 결승전 (처음 들어설 때 한 번)
+  chicken_fight: [
+    { type: 'wait', ms: 300 },
+    { type: 'spawn', id: 'fight_hs', texture: 'chick_hs', label: '현서', at: { tx: 7, ty: 8 }, facing: 'right', visible: true },
+    { type: 'spawn', id: 'fight_senior', texture: 'bull_senior', at: { tx: 13, ty: 8 }, facing: 'left', visible: true, scale: 1.3 },
+    { type: 'say', script: 'fight_intro' },
+    { type: 'chickenFight' },
+    { type: 'say', script: 'fight_after' },
+    { type: 'flag', set: { fight_done: true } },
+  ],
+
+  // 복도 "교수님 오인 소동": 신입생들이 창현에게 과제를 내다 와르르, 면도하면 수염이 더 크게 자라난다
+  ch_event: [
+    { type: 'wait', ms: 300 },
+    { type: 'say', script: 'ch_ev_intro' },
+    ...FRESH.map((id) => ({ type: 'spawn' as const, id, texture: id, at: { tx: 3, ty: 5 }, facing: 'right' as Dir })),
+    { type: 'gather', ids: FRESH, around: 'npc_chick_ch', radius: 1.9, stagger: 250 },
+    { type: 'face', ids: FRESH, toward: 'npc_chick_ch' },
+    { type: 'emote', ids: FRESH, kind: 'excl' },
+    { type: 'say', script: 'ch_ev_fresh' },
+    { type: 'paperPile', target: 'npc_chick_ch', from: FRESH },
+    { type: 'say', script: 'ch_ev_pile' },
+    { type: 'leave', ids: FRESH, to: { tx: 3, ty: 5 }, stagger: 200 },
+    { type: 'unpile', target: 'npc_chick_ch' },
+    // 면도 장면은 정면으로 보여 준다
+    { type: 'face', ids: ['npc_chick_ch'], toward: 'player' },
+    { type: 'say', script: 'ch_ev_shave1' },
+    { type: 'swap', id: 'npc_chick_ch', texture: 'chick_ch_shaved', fx: 'shave' },
+    { type: 'say', script: 'ch_ev_shave2' },
+    { type: 'wait', ms: 500 },
+    { type: 'swap', id: 'npc_chick_ch', texture: 'chick_ch_beard2', fx: 'grow' },
+    { type: 'say', script: 'ch_ev_shave3' },
+    { type: 'swap', id: 'npc_chick_ch', texture: 'chick_ch_shaved', fx: 'shave' },
+    { type: 'wait', ms: 600 },
+    { type: 'swap', id: 'npc_chick_ch', texture: 'chick_ch_beard3', fx: 'grow' },
+    { type: 'say', script: 'ch_ev_end' },
+    { type: 'flag', set: { ch_event_done: true } },
   ],
 
   // 연구실에 처음 들어섰을 때

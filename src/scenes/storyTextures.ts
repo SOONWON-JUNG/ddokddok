@@ -591,4 +591,166 @@ export function makeStoryTextures(scene: Phaser.Scene) {
     outline(ctx, 14, 18);
     tex.refresh();
   }
+
+  // ───────────────────────── 703호 체육대회 (닭싸움 결승전) ─────────────────────────
+
+  // 만국기 줄 (64x12): 알록달록 삼각 깃발
+  {
+    const { tex, ctx, r } = make('bunting', 64, 12);
+    ctx.strokeStyle = '#5a5f70';
+    ctx.beginPath();
+    ctx.moveTo(0, 1);
+    ctx.quadraticCurveTo(32, 6, 64, 1);
+    ctx.stroke();
+    const cols = ['#ef5a7a', '#ffd25e', '#5fd3ff', '#6bbf7a', '#c9a0ff', '#ff8f3f'];
+    for (let i = 0; i < 8; i++) {
+      const x = 2 + i * 8;
+      const y = 2 + Math.round(Math.sin((i / 7) * Math.PI) * 3);
+      for (let k = 0; k < 6; k++) r(x + Math.floor(k / 2), y + k, 6 - k, 1, cols[i % cols.length]);
+    }
+    tex.refresh();
+  }
+
+  // "영상정보대학 체육대회" 현수막 (160x22): 흰 천 + 파랑·빨강 테두리, 한글은 도트처럼 또렷하게
+  {
+    const W = 160;
+    const H = 22;
+    const { tex, ctx, r } = make('sports_banner', W, H);
+    r(0, 0, W, H, '#fffaf0');
+    r(0, 0, W, 2, '#2f6fd0');
+    r(0, H - 2, W, 2, '#d94b3a');
+    r(2, 4, 3, 3, '#d94b3a'); // 양쪽 끈 고리
+    r(W - 5, 4, 3, 3, '#d94b3a');
+    // 한글은 도트 글꼴이 없으므로, 작은 글씨로 그린 뒤 흐릿한 가장자리를 잘라 도트처럼 만든다
+    const tmp = document.createElement('canvas');
+    tmp.width = W;
+    tmp.height = H;
+    const t = tmp.getContext('2d')!;
+    t.fillStyle = '#000';
+    t.font = 'bold 12px "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif';
+    t.textBaseline = 'middle';
+    t.textAlign = 'center';
+    t.fillText('영상정보대학 체육대회', W / 2 - 12, H / 2 + 1);
+    const img = t.getImageData(0, 0, W, H).data;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) if (img[(y * W + x) * 4 + 3] > 120) r(x, y, 1, 1, '#2b2440');
+    }
+    digits(ctx, '2006', W - 26, 9, '#d94b3a');
+    outline(ctx, W, H);
+    tex.refresh();
+  }
+
+  // 운동회 천막 (64x40): 파랑·흰 줄무늬 지붕 + 기둥 + 아래 탁자
+  {
+    const { tex, ctx, r } = make('tent', 64, 40);
+    for (let i = 0; i < 8; i++) {
+      const c = i % 2 ? '#ffffff' : '#2f6fd0';
+      r(i * 8, 4, 8, 10, c);
+      r(i * 8 + 2, 2, 4, 2, c);
+      r(i * 8, 14, 8, 3, i % 2 ? '#e8eef6' : '#2558a8'); // 처마 물결
+    }
+    r(2, 17, 2, 22, '#8a8a9a');
+    r(60, 17, 2, 22, '#8a8a9a');
+    r(10, 27, 44, 4, '#f2efe8'); // 탁자
+    r(12, 31, 2, 8, '#8a8a9a');
+    r(50, 31, 2, 8, '#8a8a9a');
+    r(16, 23, 4, 4, '#ffd25e'); // 메달·물병
+    r(24, 22, 3, 5, '#5fd3ff');
+    r(30, 22, 3, 5, '#5fd3ff');
+    r(40, 23, 6, 4, '#ef5a7a');
+    outline(ctx, 64, 40);
+    shadow(ctx, 32, 39, 30, 2.5);
+    tex.refresh();
+  }
+
+  // 깃대 (12x36): 꼭대기에 펄럭이는 삼각 깃발
+  for (const [key, col] of [['flagpole_red', '#ef5a7a'], ['flagpole_blue', '#2f6fd0']] as const) {
+    const { tex, ctx, r } = make(key, 12, 36);
+    r(1, 0, 2, 36, '#8a8a9a');
+    r(1, 0, 2, 1, '#ffd25e');
+    for (let k = 0; k < 8; k++) r(3, 2 + k, 9 - k, 1, col);
+    outline(ctx, 12, 36);
+    shadow(ctx, 2, 35, 4, 1.5);
+    tex.refresh();
+  }
+
+  // 풍선 다발 (16x26)
+  {
+    const { tex, ctx, r } = make('balloons', 16, 26);
+    r(7, 14, 1, 12, '#8a8a9a');
+    r(5, 12, 1, 6, '#8a8a9a');
+    r(10, 12, 1, 6, '#8a8a9a');
+    disc(ctx, 5, 7, 4, '#ef5a7a');
+    disc(ctx, 11, 6, 4, '#5fd3ff');
+    disc(ctx, 8, 11, 4, '#ffd25e');
+    r(3, 5, 1, 2, '#ffffff');
+    r(9, 4, 1, 2, '#ffffff');
+    r(6, 9, 1, 2, '#ffffff');
+    outline(ctx, 16, 26);
+    tex.refresh();
+  }
+
+  // 점수판 (30x24): 청군 3 : 2 백군
+  {
+    const { tex, ctx, r } = make('scoreboard', 30, 24);
+    r(0, 0, 30, 20, '#2b2440');
+    r(2, 2, 12, 16, '#2f6fd0');
+    r(16, 2, 12, 16, '#f7f4ee');
+    digits(ctx, '3', 6, 8, '#ffffff');
+    digits(ctx, '2', 20, 8, '#2b2440');
+    r(4, 20, 2, 4, '#5a5f70');
+    r(24, 20, 2, 4, '#5a5f70');
+    outline(ctx, 30, 24);
+    tex.refresh();
+  }
+
+  // 닭싸움 경기장 원 (112x48): 바닥에 그린 흰 선
+  {
+    const { tex, ctx } = make('arena_circle', 112, 48);
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(56, 24, 53, 21, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillRect(55, 4, 2, 40);
+    tex.refresh();
+  }
+
+  // 주황 고깔 (10x12)
+  {
+    const { tex, ctx, r } = make('cone', 10, 12);
+    for (let y = 0; y < 9; y++) r(4 - Math.floor(y / 2), y, 2 + Math.floor(y / 2) * 2, 1, y === 4 || y === 5 ? '#ffffff' : '#ff8f3f');
+    r(0, 9, 10, 3, '#e06a2a');
+    outline(ctx, 10, 12);
+    tex.refresh();
+  }
+
+  // 닭싸움 대진표 포스터 (16x18)
+  {
+    const { tex, ctx, r } = make('bracket', 16, 18);
+    r(0, 0, 16, 18, '#fffaf0');
+    r(0, 0, 16, 3, '#d94b3a');
+    for (const y of [5, 9, 13]) {
+      r(2, y, 4, 1, '#2b2440');
+      r(10, y, 4, 1, '#2b2440');
+    }
+    r(6, 5, 1, 5, '#2b2440');
+    r(9, 9, 1, 5, '#2b2440');
+    r(6, 7, 4, 1, '#2b2440');
+    r(7, 15, 2, 2, '#ffd25e');
+    outline(ctx, 16, 18);
+    tex.refresh();
+  }
+
+  // 과제 종이 한 장 (10x7): 복도 "교수님 오인 소동"에서 머리 위로 쌓인다
+  {
+    const { tex, ctx, r } = make('sheet', 10, 7);
+    r(0, 0, 10, 7, '#fffaf0');
+    r(2, 2, 6, 1, '#b8b8c4');
+    r(2, 4, 5, 1, '#b8b8c4');
+    r(7, 1, 2, 1, '#ef5a7a');
+    outline(ctx, 10, 7);
+    tex.refresh();
+  }
 }

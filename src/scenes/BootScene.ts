@@ -106,6 +106,8 @@ interface ChickDef {
   shoes?: string;
   skirt?: boolean;
   goatee?: boolean;
+  /** 수염 단계 (0 없음, 1 염소수염, 2 덥수룩, 3 바닥까지). 없으면 goatee 로 정한다 */
+  beard?: 0 | 1 | 2 | 3;
   grumpy?: boolean;
 }
 const CHICK_BODY = '#ffd84a';
@@ -116,6 +118,14 @@ const CHICKS: Record<string, ChickDef> = {
   chick_hs: { hair: 'long', hairC: '#8a5a34', hairHi: '#b07a4a', cloth: '#dcc3a0', clothHi: '#ecd9bd', clothSh: '#b89c78', inner: '#f4eadb', bottom: '#2e3350', skirt: true },
   chick_ty: { hair: 'messy', hairC: '#1f1b20', hairHi: '#3a343c', cloth: '#efe3cb', clothHi: '#fbf3e2', clothSh: '#cdbf9f', inner: '#ffffff', bottom: '#2f3350', shoes: '#f2efe8' },
   chick_ch: { hair: 'spiky', hairC: '#2a2024', hairHi: '#4a3a3c', cloth: '#2b3350', clothHi: '#44507a', clothSh: '#1d2238', inner: '#d6d2da', bottom: '#2b3350', goatee: true, grumpy: true },
+  // 복도 "교수님 오인 소동": 면도한 창현, 다시 자라난 덥수룩 수염, 바닥까지 닿는 수염
+  chick_ch_shaved: { hair: 'spiky', hairC: '#2a2024', hairHi: '#4a3a3c', cloth: '#2b3350', clothHi: '#44507a', clothSh: '#1d2238', inner: '#d6d2da', bottom: '#2b3350', beard: 0, grumpy: true },
+  chick_ch_beard2: { hair: 'spiky', hairC: '#2a2024', hairHi: '#4a3a3c', cloth: '#2b3350', clothHi: '#44507a', clothSh: '#1d2238', inner: '#d6d2da', bottom: '#2b3350', beard: 2, grumpy: true },
+  chick_ch_beard3: { hair: 'spiky', hairC: '#2a2024', hairHi: '#4a3a3c', cloth: '#2b3350', clothHi: '#44507a', clothSh: '#1d2238', inner: '#d6d2da', bottom: '#2b3350', beard: 3, grumpy: true },
+  // 과제를 내러 온 병아리 신입생들
+  chick_f1: { hair: 'messy', hairC: '#8a5a34', hairHi: '#b07a4a', cloth: '#6bbf7a', clothHi: '#8fd49a', clothSh: '#4f9a5a', inner: '#ffffff', bottom: '#4a4a5a', shoes: '#f2efe8' },
+  chick_f2: { hair: 'long', hairC: '#5a3a2a', hairHi: '#7a5a42', cloth: '#ff8fc0', clothHi: '#ffb3d4', clothSh: '#d96a9a', inner: '#ffffff', bottom: '#2e3350', skirt: true },
+  chick_f3: { hair: 'spiky', hairC: '#c98a3a', hairHi: '#e0a85a', cloth: '#7fb2e5', clothHi: '#a4cbf0', clothSh: '#5a8cbf', inner: '#ffffff', bottom: '#34343f', shoes: '#f2efe8' },
 };
 
 /** 배달부 모자 색 */
@@ -181,6 +191,7 @@ export class BootScene extends Phaser.Scene {
     this.makeCharacter('npc_pizza', PIZZA_PALETTE, 'cap');
     this.makeCharacter('npc_student', STUDENT_PALETTE, 'short');
     this.makeCharacter('man_dev', DEV_PALETTE, 'short');
+    this.makeBull('bull_senior');
     for (const [key, k] of Object.entries(KIDS)) this.makeCharacter(key, k.pal, k.style);
     for (const [key, c] of Object.entries(CHICKS)) this.makeChick(key, c);
     this.makeTrees();
@@ -505,6 +516,45 @@ export class BootScene extends Phaser.Scene {
     }
   }
 
+  /** 703호 닭싸움 상대: 빨간 체육복을 입은 황소 선배 (병아리와 같은 틀: 26x38, 4방향 x 3프레임) */
+  private makeBull(key: string) {
+    const cols = 3;
+    const W = PLAYER_FRAME_W * cols;
+    const H = PLAYER_FRAME_H * DIRS.length;
+    const { tex, ctx } = this.canvas(key, W, H);
+    DIRS.forEach((dir, row) => {
+      for (let f = 0; f < cols; f++) {
+        const ox = f * PLAYER_FRAME_W;
+        const oy = row * PLAYER_FRAME_H;
+        const mirror = dir === 'right';
+        const px = (x: number, y: number, w: number, h: number, color: string) => {
+          const X = mirror ? 24 - x - w : x;
+          ctx.fillStyle = color;
+          ctx.fillRect(ox + 1 + X, oy + 1 + y, w, h);
+        };
+        drawBull(px, dir, f);
+      }
+    });
+    outline(ctx, W, H);
+    DIRS.forEach((dir, row) => {
+      for (let f = 0; f < cols; f++) {
+        const ox = f * PLAYER_FRAME_W;
+        const oy = row * PLAYER_FRAME_H;
+        groundShadow(ctx, ox + 13, oy + 36, 9, 2.6);
+        tex.add(`${dir}_${f}`, 0, ox, oy, PLAYER_FRAME_W, PLAYER_FRAME_H);
+      }
+    });
+    tex.refresh();
+    for (const dir of DIRS) {
+      this.anims.create({
+        key: `${key}_walk_${dir}`,
+        frames: [1, 0, 2, 0].map((f) => ({ key, frame: `${dir}_${f}` })),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
+  }
+
   private drawChick(px: (x: number, y: number, w: number, h: number, c: string) => void, dir: Dir, f: number, d: ChickDef) {
     const bob = f === 0 ? 0 : 1; // 걸을 때 통통 튄다
     const lift1 = f === 1 ? 1 : 0;
@@ -653,9 +703,25 @@ export class BootScene extends Phaser.Scene {
       px(17, hy + 3, 2, 2, '#f7a36a');
       px(11, hy + 3, 2, 1, CHICK_ORANGE);
       px(11, hy + 4, 2, 1, '#d77f1c');
-      if (d.goatee) {
+      const beard = d.beard ?? (d.goatee ? 1 : 0);
+      if (beard === 1) {
         px(9, hy + 5, 6, 1, d.hairC);
         px(10, hy + 6, 4, 2, d.hairC);
+      } else if (beard === 2) {
+        px(7, hy + 5, 10, 4, d.hairC);
+        px(8, hy + 9, 8, 3, d.hairC);
+        px(10, hy + 12, 4, 2, d.hairC);
+        px(9, hy + 6, 1, 4, d.hairHi);
+        px(13, hy + 7, 1, 4, d.hairHi);
+      } else if (beard === 3) {
+        // 산신령처럼 바닥까지 닿는 수염
+        px(6, hy + 5, 12, 5, d.hairC);
+        px(7, hy + 10, 10, 8, d.hairC);
+        px(8, hy + 18, 8, 5, d.hairC);
+        px(9, hy + 23, 6, 1, d.hairC);
+        px(9, hy + 6, 1, 14, d.hairHi);
+        px(13, hy + 8, 1, 13, d.hairHi);
+        px(16, hy + 6, 1, 6, d.hairHi);
       }
       return;
     }
@@ -674,7 +740,17 @@ export class BootScene extends Phaser.Scene {
     }
     px(6, hy, 2, 3, '#2a2024');
     px(4, hy + 3, 2, 2, '#f7a36a');
-    if (d.goatee) px(5, hy + 5, 4, 3, d.hairC);
+    const beardS = d.beard ?? (d.goatee ? 1 : 0);
+    if (beardS === 1) px(5, hy + 5, 4, 3, d.hairC);
+    else if (beardS === 2) {
+      px(4, hy + 5, 7, 5, d.hairC);
+      px(5, hy + 10, 4, 2, d.hairC);
+    } else if (beardS === 3) {
+      px(3, hy + 5, 9, 8, d.hairC);
+      px(4, hy + 13, 7, 8, d.hairC);
+      px(5, hy + 21, 5, 3, d.hairC);
+      px(5, hy + 7, 1, 12, d.hairHi);
+    }
   }
 
   // ───────────────────────── 나무와 소품 ─────────────────────────
@@ -1042,4 +1118,108 @@ export class BootScene extends Phaser.Scene {
     ctx.fillRect(6, 6, 2, 2);
     tex.refresh();
   }
+}
+
+/** 황소 선배 한 프레임 (좌표는 24x36 안쪽). 갈색 털, 하얀 뿔, 코뚜레, 빨간 체육복 */
+function drawBull(px: (x: number, y: number, w: number, h: number, c: string) => void, dir: Dir, f: number) {
+  const FUR = '#8a5a34';
+  const FUR_HI = '#a8743f';
+  const FUR_SH = '#6a4226';
+  const MUZZLE = '#e2b98a';
+  const HORN = '#f2e8d0';
+  const HORN_SH = '#cfc2a0';
+  const JERSEY = '#d94b3a';
+  const JERSEY_HI = '#ef6a58';
+  const PANTS = '#2f3a5a';
+  const HOOF = '#3a2a20';
+  const lift1 = f === 1 ? 1 : 0;
+  const lift2 = f === 2 ? 1 : 0;
+  const oy = f === 0 ? 0 : -1;
+  const front = dir === 'down';
+  const back = dir === 'up';
+  const side = !front && !back;
+
+  // 다리(체육복 바지) + 발굽
+  px(6, 28 - lift1, 5, 6 + lift1, PANTS);
+  px(13, 28 - lift2, 5, 6 + lift2, PANTS);
+  px(6, 33, 5, 2, HOOF);
+  px(13, 33, 5, 2, HOOF);
+  // 몸통(빨간 체육복, 흰 줄)
+  px(4, 17 + oy, 16, 12, JERSEY);
+  px(4, 17 + oy, 16, 2, JERSEY_HI);
+  if (!side) {
+    px(4, 20 + oy, 1, 8, '#ffffff');
+    px(19, 20 + oy, 1, 8, '#ffffff');
+  }
+  if (front) {
+    px(10, 17 + oy, 4, 3, MUZZLE); // 목
+    px(11, 21 + oy, 2, 7, '#ffffff'); // 지퍼
+  }
+  if (back) {
+    px(9, 20 + oy, 6, 6, '#ffffff'); // 등번호 판
+    px(11, 21 + oy, 2, 4, JERSEY);
+  }
+  // 팔(털) + 소매
+  if (side) {
+    px(10, 19 + oy, 5, 8, JERSEY_HI);
+    px(10, 26 + oy, 5, 2, FUR);
+  } else {
+    px(1, 18 + oy + lift1, 3, 8, JERSEY);
+    px(20, 18 + oy + lift2, 3, 8, JERSEY);
+    px(1, 26 + oy + lift1, 3, 2, FUR);
+    px(20, 26 + oy + lift2, 3, 2, FUR);
+  }
+
+  // 머리 (크고 네모난 소 얼굴)
+  const hy = 3 + oy;
+  // 뿔
+  if (side) {
+    px(9, hy - 1, 3, 3, HORN);
+    px(10, hy - 3, 2, 2, HORN);
+    px(9, hy + 1, 3, 1, HORN_SH);
+  } else {
+    px(1, hy + 2, 4, 2, HORN);
+    px(0, hy - 1, 2, 4, HORN);
+    px(19, hy + 2, 4, 2, HORN);
+    px(22, hy - 1, 2, 4, HORN);
+    px(1, hy + 3, 4, 1, HORN_SH);
+    px(19, hy + 3, 4, 1, HORN_SH);
+  }
+  if (side) {
+    // 옆모습: 주둥이가 앞(왼쪽)으로 튀어나온다
+    px(6, hy + 1, 12, 12, FUR);
+    px(6, hy + 1, 12, 2, FUR_HI);
+    px(2, hy + 7, 6, 6, MUZZLE);
+    px(2, hy + 9, 1, 2, '#4a2c1a');
+    px(3, hy + 12, 3, 2, '#ffd25e'); // 코뚜레
+    px(9, hy + 5, 2, 2, '#1f1b20');
+    px(9, hy + 5, 1, 1, '#ffffff');
+    px(15, hy + 4, 4, 2, FUR_SH); // 귀
+    return;
+  }
+  px(5, hy + 1, 14, 13, FUR);
+  px(5, hy + 1, 14, 2, FUR_HI);
+  px(2, hy + 5, 3, 3, FUR); // 귀
+  px(19, hy + 5, 3, 3, FUR);
+  px(2, hy + 6, 2, 1, FUR_SH);
+  px(20, hy + 6, 2, 1, FUR_SH);
+  if (back) {
+    px(8, hy + 2, 8, 3, FUR_SH); // 뒤통수 털
+    return;
+  }
+  px(9, hy + 1, 6, 3, FUR_SH); // 이마 앞머리 털
+  // 눈 (짙은 눈썹으로 의기양양)
+  px(7, hy + 5, 3, 2, '#1f1b20');
+  px(14, hy + 5, 3, 2, '#1f1b20');
+  px(7, hy + 5, 1, 1, '#ffffff');
+  px(14, hy + 5, 1, 1, '#ffffff');
+  px(6, hy + 4, 4, 1, FUR_SH);
+  px(14, hy + 4, 4, 1, FUR_SH);
+  // 주둥이 + 콧구멍 + 금색 코뚜레
+  px(6, hy + 9, 12, 6, MUZZLE);
+  px(8, hy + 10, 2, 2, '#4a2c1a');
+  px(14, hy + 10, 2, 2, '#4a2c1a');
+  px(10, hy + 13, 4, 1, '#ffd25e');
+  px(10, hy + 14, 1, 1, '#ffd25e');
+  px(13, hy + 14, 1, 1, '#ffd25e');
 }

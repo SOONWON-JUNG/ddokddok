@@ -127,7 +127,7 @@ export function buildOffice(): MapData {
       { tx: 7, ty: 10, texture: 'rug', depth: 1 },
     ],
     timeline: { kind: 'fixed', year: 2006 },
-    links: { hall: { tx: 2, ty: 3 }, outdoor: { tx: 2, ty: 3 }, garden: { tx: 2, ty: 3 } },
+    links: { hall: { tx: 2, ty: 3 }, outdoor: { tx: 2, ty: 3 }, garden: { tx: 2, ty: 3 }, room701: { tx: 2, ty: 3 }, room703: { tx: 2, ty: 3 } },
     spawns: {
       from_hall: { tx: 3, ty: 5, facing: 'down' },
     },

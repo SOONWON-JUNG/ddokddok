@@ -542,8 +542,14 @@ export function initSoundButton() {
     btn.textContent = audio.isMuted ? '🔇' : '🔊';
   };
   sync();
+  // 버튼이 키보드 포커스를 갖고 있으면, 대화를 넘기려고 누른 Space/Enter 가 이 버튼을 눌러 음소거가 켜져 버린다.
+  // 그래서 포커스를 받지 않게 하고, 키보드로 눌린 클릭(detail 0)은 무시한다.
+  btn.tabIndex = -1;
+  btn.addEventListener('mousedown', (e) => e.preventDefault());
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
+    btn.blur();
+    if (e.detail === 0) return;
     audio.toggleMute();
     audio.unlock();
     sync();
@@ -551,4 +557,15 @@ export function initSoundButton() {
   });
   // 게임 화면 터치와 겹치지 않도록
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+  // 혹시 포커스가 남아 있어도 Space/Enter 가 버튼을 누르지 않게 한다
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (document.activeElement === btn && (e.code === 'Space' || e.code === 'Enter')) {
+        e.preventDefault();
+        btn.blur();
+      }
+    },
+    true,
+  );
 }

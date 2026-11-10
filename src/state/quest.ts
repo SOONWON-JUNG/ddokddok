@@ -52,9 +52,27 @@ export const QUEST: QuestStep[] = [
     target: { map: 'outdoor', tx: 7, ty: 34 },
   },
   {
+    id: 'meet_ch',
+    done: 'ch_talked',
+    text: '복도에서 이야기 중인 박성대 교수님과 병아리에게 다가가 보세요',
+    target: { map: 'hall', tx: 11, ty: 7 },
+  },
+  {
+    id: 'visit701',
+    done: 'taejin_talked',
+    text: '음악 소리가 나는 701호에서 춤추는 병아리에게 말을 걸어 보세요',
+    target: { map: 'room701', tx: 10, ty: 8 },
+  },
+  {
+    id: 'visit703',
+    done: 'hs_talked',
+    text: '함성이 들리는 703호 운동장에서 넘어진 병아리에게 말을 걸어 보세요',
+    target: { map: 'room703', tx: 3, ty: 10 },
+  },
+  {
     id: 'knock',
     done: 'knocked',
-    text: '복도 끝 702호 연구실 문을 두드려 보세요',
+    text: '이제 702호 연구실 문을 두드려 보세요',
     target: { map: 'hall', tx: 21, ty: 3 },
   },
   {

@@ -98,7 +98,7 @@ export function buildRoom701(): MapData {
       { tx: 17, ty: 10, texture: 'boombox', depth: 11 * 16 },
     ],
     timeline: { kind: 'fixed', year: 2006 },
-    links: { hall: { tx: 2, ty: 3 }, outdoor: { tx: 2, ty: 3 }, office: { tx: 2, ty: 3 }, garden: { tx: 2, ty: 3 } },
+    links: { hall: { tx: 2, ty: 3 }, outdoor: { tx: 2, ty: 3 }, office: { tx: 2, ty: 3 }, garden: { tx: 2, ty: 3 }, room701: { tx: 2, ty: 3 }, room703: { tx: 2, ty: 3 } },
     spawns: {
       from_hall: { tx: 3, ty: 5, facing: 'down' },
     },

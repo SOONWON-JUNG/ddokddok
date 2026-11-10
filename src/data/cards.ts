@@ -59,6 +59,12 @@ export const CARDS: Record<string, CardOptions> = {
   cal_2014: { calendar: true, hideMedia: true, caption: '2014', button: '다음 장' },
   cal_2026: { calendar: true, hideMedia: true, caption: '2026', button: '다음 장' },
   cal_end: { calendar: true, hideMedia: true, text: '그다음 페이지는\n아직 쓰이지 않았다.', button: '닫기' },
+  // 703호 닭싸움 대진표
+  bracket_703: {
+    note: true,
+    hideMedia: true,
+    text: '[체육대회 닭싸움 대진표]\n\n결승전\n병아리급 노현서 vs 헤비급 황소 선배\n\n※ 체급 차이는 열정으로 극복합니다 (아마도)',
+  },
   // 701호 UCDC 연습실 포스터
   poster_ucdc: {
     poster: '#c9a0ff',

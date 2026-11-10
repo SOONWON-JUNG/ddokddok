@@ -28,6 +28,7 @@ import { dialogue } from '../ui/dialogue';
 import { SeasonEffects } from '../effects/seasonEffects';
 import { PuppyFollower } from '../entities/puppy';
 import { burstConfetti, burstDirt, flowerBurst } from '../effects/particles';
+import { HS_FALLEN } from '../map/room703';
 import { anyOverlayOpen, comicViewer, credits, imageCard, paperViewer, popText, uiState } from '../ui/overlays';
 import { setGoalHint } from '../ui/hint';
 import { PLAYER_ORIGIN_Y, type Dir } from './BootScene';
@@ -256,7 +257,9 @@ export class WorldScene extends Phaser.Scene {
           sprite = this.add
             .image(it.tx * TILE + TILE / 2, it.ty * TILE + TILE / 2, it.texture, `${dir}_0`)
             .setOrigin(0.5, PLAYER_ORIGIN_Y)
-            .setDepth(it.ty * TILE + TILE / 2);
+            .setDepth(it.ty * TILE + TILE / 2)
+            .setAngle(it.angle ?? 0)
+            .setScale(it.scale ?? 1);
         } else {
           sprite = this.add
             .image(rect.centerX + (it.dx ?? 0), (it.ty + 1) * TILE + (it.dy ?? 0), it.texture)
@@ -335,7 +338,12 @@ export class WorldScene extends Phaser.Scene {
       e.sprite?.setVisible(on);
       // 열린 문, 열린 상자처럼 플래그에 따라 그림이 바뀌는 대상
       const alt = e.it.altTexture;
-      if (alt && e.sprite && e.it.texture) e.sprite.setTexture(gameState.has(alt.flag) ? alt.texture : e.it.texture);
+      if (alt && e.sprite && e.it.texture) {
+        const key = gameState.has(alt.flag) ? alt.texture : e.it.texture;
+        // NPC 는 방향 프레임을 유지한 채 그림만 바꾼다
+        if (e.it.kind === 'npc') e.sprite.setTexture(key, e.sprite.frame.name);
+        else e.sprite.setTexture(key);
+      }
       if (!on) e.bubble.setVisible(false);
     }
   }
@@ -474,8 +482,10 @@ export class WorldScene extends Phaser.Scene {
 
   private async interact(it: Interactable) {
     if (this.isBusy()) return;
-    if (it.requires && !gameState.has(it.requires)) {
-      await dialogue.say(it.lockedText ?? '지금은 열 수 없어요.');
+    const missing = ([] as string[]).concat(it.requires ?? []).filter((f) => !gameState.has(f));
+    if (missing.length) {
+      const hints = missing.map((f) => it.lockedHints?.[f]).filter(Boolean);
+      await dialogue.say([it.lockedText ?? '지금은 열 수 없어요.', ...hints].join('\n'));
       return;
     }
     const a = it.action;
@@ -587,7 +597,8 @@ export class WorldScene extends Phaser.Scene {
           .sprite(x, y, st.texture, `${st.facing ?? 'down'}_0`)
           .setOrigin(0.5, PLAYER_ORIGIN_Y)
           .setDepth(y)
-          .setAlpha(0);
+          .setAlpha(st.visible ? 1 : 0)
+          .setScale(st.scale ?? 1);
         this.actors.set(st.id, spr);
         created.push(st.id);
         if (st.label) this.addNameTag(spr, st.label);
@@ -601,6 +612,18 @@ export class WorldScene extends Phaser.Scene {
         break;
       case 'morph':
         await this.morph(st);
+        break;
+      case 'paperPile':
+        await this.paperPile(st);
+        break;
+      case 'unpile':
+        await this.unpile(st.target);
+        break;
+      case 'swap':
+        await this.swapLook(st);
+        break;
+      case 'chickenFight':
+        await this.chickenFight();
         break;
       case 'flowers':
         await this.flowerFireworks(st.at, st.rounds ?? 4);
@@ -835,6 +858,194 @@ export class WorldScene extends Phaser.Scene {
         );
       }),
     );
+  }
+
+  /** 과제 폭탄으로 쌓였다가 무너진 종이들 (unpile 에서 치운다) */
+  private pileSheets: Phaser.GameObjects.Image[] = [];
+
+  /** 과제 폭탄: 병아리들이 차례로 종이를 머리 위에 쌓고, 흔들흔들하다 와르르 무너진다 */
+  private async paperPile(st: Extract<CutStep, { type: 'paperPile' }>) {
+    const t = this.actorOf(st.target);
+    const top = t.y - t.displayHeight * t.originY;
+    const sheets: Phaser.GameObjects.Image[] = [];
+    for (const id of st.from) {
+      const f = this.actorOf(id);
+      for (let k = 0; k < 4; k++) {
+        const img = this.add.image(f.x, f.y - 14, 'sheet').setDepth(9500);
+        const x1 = t.x + (Math.random() - 0.5) * 3;
+        const y1 = top - 1 - sheets.length * 3;
+        const x0 = img.x;
+        const y0 = img.y;
+        await new Promise<void>((resolve) =>
+          this.tweens.addCounter({
+            from: 0,
+            to: 1,
+            duration: 220,
+            onUpdate: (tw) => {
+              const p = Number(tw.getValue());
+              img.setPosition(x0 + (x1 - x0) * p, y0 + (y1 - y0) * p - Math.sin(Math.PI * p) * 14);
+            },
+            onComplete: () => resolve(),
+          }),
+        );
+        img.setAngle((Math.random() - 0.5) * 16);
+        sheets.push(img);
+        audio.sfx('paper');
+      }
+      await this.delay(120);
+    }
+    // 흔들흔들… 탑이 휘청거린다
+    for (let w = 0; w < 8; w++) {
+      const dir = w % 2 ? 1 : -1;
+      sheets.forEach((s, i) => {
+        s.x = t.x + dir * i * 0.7;
+        s.setAngle(dir * i * 1.4);
+      });
+      await this.delay(120);
+    }
+    // 와르르!
+    audio.sfx('thud');
+    this.cameras.main.shake(200, 0.005);
+    await Promise.all(
+      sheets.map(
+        (s) =>
+          new Promise<void>((resolve) =>
+            this.tweens.add({
+              targets: s,
+              x: t.x + (Math.random() - 0.5) * 22,
+              y: t.y - 2 - Math.random() * 16,
+              angle: (Math.random() - 0.5) * 120,
+              duration: 320 + Math.random() * 120,
+              ease: 'Quad.easeIn',
+              onComplete: () => resolve(),
+            }),
+          ),
+      ),
+    );
+    sheets.forEach((s) => s.setDepth(t.depth + 1));
+    this.pileSheets = sheets;
+  }
+
+  /** 종이 더미를 털고 폴짝 튀어나온다 */
+  private async unpile(target: string) {
+    const t = this.actorOf(target);
+    audio.sfx('whoosh');
+    for (const s of this.pileSheets) {
+      const ang = Math.random() * Math.PI * 2;
+      this.tweens.add({
+        targets: s,
+        x: s.x + Math.cos(ang) * 40,
+        y: s.y + Math.sin(ang) * 26 - 10,
+        alpha: 0,
+        angle: s.angle + (Math.random() - 0.5) * 300,
+        duration: 600,
+        onComplete: () => s.destroy(),
+      });
+    }
+    this.pileSheets = [];
+    const y0 = t.y;
+    await new Promise<void>((resolve) => this.tweens.add({ targets: t, y: y0 - 8, duration: 140, yoyo: true, onComplete: () => resolve() }));
+    t.y = y0;
+  }
+
+  /** 그림 바꾸기: shave(반짝, 깨끗) / grow(뿅! 하고 커진다) */
+  private async swapLook(st: Extract<CutStep, { type: 'swap' }>) {
+    const a = this.actorOf(st.id);
+    const frame = a.frame.name;
+    if (st.fx === 'shave') {
+      audio.sfx('whoosh');
+      await this.delay(250);
+      audio.sfx('sparkle');
+      const flash = this.add.circle(a.x, a.y - 12, 5, 0xffffff, 0.95).setDepth(9800);
+      this.tweens.add({ targets: flash, scale: 3, alpha: 0, duration: 380, onComplete: () => flash.destroy() });
+      a.setTexture(st.texture, frame);
+      await this.delay(300);
+    } else {
+      audio.sfx('pop');
+      popText('뿅!', 700);
+      a.setTexture(st.texture, frame);
+      await new Promise<void>((resolve) =>
+        this.tweens.add({ targets: a, scaleX: 1.25, scaleY: 1.25, duration: 130, yoyo: true, ease: 'Back.easeOut', onComplete: () => resolve() }),
+      );
+      a.setScale(1);
+    }
+  }
+
+  /** 703호 닭싸움: 한 발로 콩콩 다가가 부딪치면, 병아리 현서가 공중제비를 돌며 멀리 날아가 대자로 뻗는다 */
+  private async chickenFight() {
+    const hs = this.actorOf('fight_hs') as Phaser.GameObjects.Sprite;
+    const sn = this.actorOf('fight_senior') as Phaser.GameObjects.Sprite;
+    hs.setAlpha(1).setFrame('right_0');
+    sn.setAlpha(1).setScale(1.3).setFrame('left_0');
+    // 한 발로 콩콩 뛰며 다가간다
+    const hop = (a: Phaser.GameObjects.Sprite, dx: number, ms: number, hops: number) => {
+      const x0 = a.x;
+      const y0 = a.y;
+      return new Promise<void>((resolve) =>
+        this.tweens.addCounter({
+          from: 0,
+          to: 1,
+          duration: ms,
+          onUpdate: (tw) => {
+            const t = Number(tw.getValue());
+            a.x = x0 + dx * t;
+            a.y = y0 - Math.abs(Math.sin(t * Math.PI * hops)) * 4;
+          },
+          onComplete: () => {
+            a.y = y0;
+            resolve();
+          },
+        }),
+      );
+    };
+    await Promise.all([hop(hs, 1.7 * TILE, 1400, 7), hop(sn, -1.5 * TILE, 1400, 5)]);
+    this.emote('fight_hs', 'excl');
+    this.emote('fight_senior', 'excl');
+    audio.sfx('pop');
+    await this.delay(700);
+    // 서로 한 번씩 움찔
+    await Promise.all([hop(hs, 3, 160, 1), hop(sn, -3, 160, 1)]);
+    await this.delay(250);
+    // 쿵! 선배가 무릎으로 밀자
+    await hop(sn, -8, 140, 1);
+    audio.sfx('thud');
+    this.cameras.main.shake(220, 0.006);
+    burstConfetti(this, (hs.x + sn.x) / 2, hs.y - 12);
+    // 현서가 공중제비 세 바퀴를 돌며 멀리 날아간다
+    audio.sfx('whoosh');
+    const x0 = hs.x;
+    const y0 = hs.y;
+    const x1 = HS_FALLEN.tx * TILE + TILE / 2;
+    const y1 = HS_FALLEN.ty * TILE + TILE / 2;
+    hs.setFrame('down_0');
+    await new Promise<void>((resolve) =>
+      this.tweens.addCounter({
+        from: 0,
+        to: 1,
+        duration: 1000,
+        ease: 'Sine.easeOut',
+        onUpdate: (tw) => {
+          const t = Number(tw.getValue());
+          hs.x = x0 + (x1 - x0) * t;
+          hs.y = y0 + (y1 - y0) * t - Math.sin(Math.PI * t) * 56;
+          hs.setAngle(-90 - 1080 * (1 - t));
+          hs.setDepth(9000);
+        },
+        onComplete: () => resolve(),
+      }),
+    );
+    hs.setAngle(-90).setDepth(y1);
+    // 쿵, 데굴
+    audio.sfx('thud');
+    this.cameras.main.shake(160, 0.004);
+    for (let i = 0; i < 3; i++) burstDirt(this, x1 + (i - 1) * 6, y1);
+    await this.delay(400);
+    this.emote('fight_hs', 'note');
+    // 선배는 승리의 콩콩
+    await hop(sn, 0, 500, 3);
+    this.emote('fight_senior', 'heart');
+    audio.sfx('fanfare');
+    await this.delay(900);
   }
 
   /** 쿠키 영상: 크레딧이 끝난 뒤, 아무도 없는 정원에서 강아지가 신나게 놀다가 사람으로 변하고 하트가 뜬다 */

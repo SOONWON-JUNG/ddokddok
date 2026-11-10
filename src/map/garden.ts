@@ -94,7 +94,7 @@ export function buildGarden(): MapData {
     zones: [{ id: 'garden_enter', tx: 1, ty: 1, w: GARDEN_W - 2, h: GARDEN_H - 2, set: { garden_entered: true } }],
     // 정원은 현재(2026년)
     timeline: { kind: 'fixed', year: 2026 },
-    links: { outdoor: { tx: 13, ty: 19 }, hall: { tx: 13, ty: 19 }, office: { tx: 13, ty: 19 } },
+    links: { outdoor: { tx: 13, ty: 19 }, hall: { tx: 13, ty: 19 }, office: { tx: 13, ty: 19 }, room701: { tx: 13, ty: 19 }, room703: { tx: 13, ty: 19 } },
     spawns: {
       from_outdoor: { tx: 13, ty: 16, facing: 'up' },
     },

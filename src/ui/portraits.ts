@@ -94,6 +94,34 @@ function parfait(px: Px) {
   px(19, 13, 3, 1, '#ffd25e');
 }
 
+/** 황소 선배 얼굴 (703호 닭싸움) */
+function bull() {
+  return (px: Px) => {
+    px(3, 18, 18, 6, '#d94b3a');
+    px(3, 18, 18, 1, '#ef6a58');
+    px(11, 19, 2, 5, '#ffffff');
+    px(1, 4, 4, 2, '#f2e8d0'); // 뿔
+    px(0, 1, 2, 4, '#f2e8d0');
+    px(19, 4, 4, 2, '#f2e8d0');
+    px(22, 1, 2, 4, '#f2e8d0');
+    px(4, 3, 16, 15, '#8a5a34');
+    px(4, 3, 16, 2, '#a8743f');
+    px(1, 7, 3, 3, '#8a5a34');
+    px(20, 7, 3, 3, '#8a5a34');
+    px(9, 3, 6, 3, '#6a4226');
+    px(7, 8, 3, 2, '#1f1b20');
+    px(14, 8, 3, 2, '#1f1b20');
+    px(7, 8, 1, 1, '#ffffff');
+    px(14, 8, 1, 1, '#ffffff');
+    px(6, 7, 4, 1, '#6a4226');
+    px(14, 7, 4, 1, '#6a4226');
+    px(5, 12, 14, 6, '#e2b98a');
+    px(8, 13, 2, 2, '#4a2c1a');
+    px(14, 13, 2, 2, '#4a2c1a');
+    px(10, 16, 4, 1, '#ffd25e');
+  };
+}
+
 /** 제자(사람) 얼굴 */
 function kid(o: { hair: string; hairHi: string; shirt: string; shirtHi: string; style: 'long' | 'short' | 'spiky'; skin?: string; goatee?: boolean }) {
   return (px: Px) => {
@@ -139,7 +167,7 @@ function kid(o: { hair: string; hairHi: string; shirt: string; shirtHi: string; 
 }
 
 /** 병아리 얼굴: 노란 동글한 머리 + 부리 + 각자의 머리 모양 */
-function chick(o: { hair: string; hairHi: string; shirt: string; shirtHi: string; style: 'long' | 'messy' | 'spiky'; goatee?: boolean; grumpy?: boolean }) {
+function chick(o: { hair: string; hairHi: string; shirt: string; shirtHi: string; style: 'long' | 'messy' | 'spiky'; goatee?: boolean; grumpy?: boolean; bigBeard?: boolean }) {
   const Y = '#ffd84a';
   const YH = '#ffe98a';
   const YS = '#f0b52e';
@@ -199,7 +227,11 @@ function chick(o: { hair: string; hairHi: string; shirt: string; shirtHi: string
     px(16, 14, 3, 2, '#f7a36a');
     px(10, 14, 4, 2, '#f29a2e');
     px(11, 16, 2, 1, '#d77f1c');
-    if (o.goatee) {
+    if (o.bigBeard) {
+      px(6, 17, 12, 7, o.hair);
+      px(8, 18, 1, 6, o.hairHi);
+      px(14, 18, 1, 6, o.hairHi);
+    } else if (o.goatee) {
       px(9, 17, 6, 1, o.hair);
       px(10, 18, 4, 1, o.hair);
     }
@@ -213,10 +245,13 @@ const PORTRAITS: Record<string, { draw: (px: Px) => void; bg: string }> = {
   kid_hs: { draw: kid({ hair: '#8a5a34', hairHi: '#b07a4a', shirt: '#dcc3a0', shirtHi: '#ecd9bd', style: 'long' }), bg: '#f6e8d6' },
   kid_ty: { draw: kid({ hair: '#1f1b20', hairHi: '#3a343c', shirt: '#efe3cb', shirtHi: '#fbf3e2', style: 'short' }), bg: '#e7eef6' },
   npc_student: { draw: kid({ hair: '#5a3a2a', hairHi: '#7a5a42', shirt: '#7fb2e5', shirtHi: '#a4cbf0', style: 'short' }), bg: '#e7eef6' },
+  bull_senior: { draw: bull(), bg: '#f6e0d8' },
   prof_ps: { draw: kid({ hair: '#1c1a1e', hairHi: '#34303a', shirt: '#9a9ca6', shirtHi: '#b4b6c0', style: 'short', skin: '#ecc09a' }), bg: '#ece4ea' },
   kid_ch: { draw: kid({ hair: '#2a2024', hairHi: '#4a3a3c', shirt: '#cfcad0', shirtHi: '#e3dfe5', style: 'spiky', skin: '#e9b98d', goatee: true }), bg: '#e6e1ea' },
   chick_hs: { draw: chick({ hair: '#8a5a34', hairHi: '#b07a4a', shirt: '#dcc3a0', shirtHi: '#ecd9bd', style: 'long' }), bg: '#fdeedd' },
   chick_ty: { draw: chick({ hair: '#1f1b20', hairHi: '#3a343c', shirt: '#efe3cb', shirtHi: '#fbf3e2', style: 'messy' }), bg: '#e7eef6' },
+  chick_ch_beard3: { draw: chick({ hair: '#2a2024', hairHi: '#4a3a3c', shirt: '#2b3350', shirtHi: '#44507a', style: 'spiky', grumpy: true, bigBeard: true }), bg: '#e6e1ea' },
+  chick_fresh: { draw: chick({ hair: '#8a5a34', hairHi: '#b07a4a', shirt: '#6bbf7a', shirtHi: '#8fd49a', style: 'messy' }), bg: '#e6f4e2' },
   chick_ch: { draw: chick({ hair: '#2a2024', hairHi: '#4a3a3c', shirt: '#2b3350', shirtHi: '#44507a', style: 'spiky', goatee: true, grumpy: true }), bg: '#e6e1ea' },
 };
 
