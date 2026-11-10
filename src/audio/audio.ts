@@ -165,6 +165,16 @@ const TRACKS: Record<SynthName, Track> = {
 
 const MUTE_KEY = 'ddokddok.muted';
 
+/** 아이패드/아이폰 (아이패드 OS 는 Mac 처럼 보이므로 터치 지점 수로 구분) */
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+/**
+ * 배경음악 크기 (0~1). 비밀 정원(보물상자·엔딩)은 조금 크게, 나머지 장면은 더 작게.
+ * 아이패드는 스피커 소리가 커서 한 번 더 줄인다.
+ */
+const BGM_VOL_GARDEN = 0.36;
+const BGM_VOL_FIELD = 0.25;
+const IOS_BGM_SCALE = 0.8;
+
 /** 재생 허락을 받기 위한 아주 짧은 무음 (WAV, 8bit 모노 8kHz 0.1초) */
 const SILENT_WAV = (() => {
   const n = 800;
@@ -341,7 +351,7 @@ class AudioEngine {
       const file = await this.probeFile(name);
       if (this.current !== name || !this.ctx) return;
       this.music.gain.cancelScheduledValues(this.ctx.currentTime);
-      this.music.gain.setTargetAtTime(0.5, this.ctx.currentTime, 0.2);
+      this.music.gain.setTargetAtTime(IS_IOS ? 0.3 : 0.36, this.ctx.currentTime, 0.2);
       if (file) {
         this.playFile(file, name);
       } else {
@@ -367,11 +377,11 @@ class AudioEngine {
     return p;
   }
 
-  /** 비밀 정원(보물상자, 엔딩)은 원래 볼륨, 나머지 장면은 30% 낮춘다 */
+  /** 볼륨은 BGM_VOL_* (비밀 정원이 조금 더 크다). 아이패드는 IOS_BGM_SCALE 만큼 더 작게 */
   private playFile(url: string, name: BgmName) {
     const el = this.musicEl;
     if (!el || !this.ctx) return;
-    const vol = name === 'garden' || name === 'ending' ? 0.55 : 0.55 * 0.7;
+    const vol = (name === 'garden' || name === 'ending' ? BGM_VOL_GARDEN : BGM_VOL_FIELD) * (IS_IOS ? IOS_BGM_SCALE : 1);
     this.fileUrl = url;
     if (!el.src.endsWith(url)) el.src = url;
     el.loop = true;

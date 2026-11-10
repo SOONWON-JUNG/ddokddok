@@ -1,7 +1,7 @@
 이 폴더의 bgm_*.m4a 파일이 장면별 배경음악입니다. 같은 이름의 파일이 없으면 코드로 만든 기본 곡이 나옵니다.
 (.mp3 파일도 같은 이름으로 넣으면 재생됩니다. 아이패드에서는 m4a(AAC)가 가장 안전해요.)
 
-  bgm_outdoor.m4a   비탈길(야외)            모차르트 피아노 소나타 16번 K.545 1악장 (Musopen, 퍼블릭 도메인)
+  bgm_outdoor.m4a   비탈길(야외)            바흐 골드베르크 변주곡 제1·4·5·7변주를 이어 붙임 (Kimiko Ishizaka, CC0)
   bgm_hall.m4a      산학협력관 복도(702호 앞)  슈만 〈트로이메라이〉 Op.15 No.7 (Musopen, Donald Betts, 퍼블릭 도메인)
   bgm_office.m4a    702호 연구실(회상)        쇼팽 녹턴 Op.62 No.2 (Musopen, Donald Betts, 퍼블릭 도메인) — 앞 2분 45초만 사용
   bgm_paper.m4a     교수님 첨삭(과제지 읽기)    바흐 골드베르크 변주곡 아리아 (Kimiko Ishizaka, CC0) — 앞 3분 5초만 사용

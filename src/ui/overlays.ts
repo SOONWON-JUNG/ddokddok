@@ -377,7 +377,7 @@ const CREDIT_BLOCKS: string[] = [
   '교수님, 총장 취임을 축하드립니다!',
   '오래전 702호 문을 두드리던 저희가\n오늘은 작은 캠퍼스를 만들어 다시 찾아왔습니다.',
   '{{MADE WITH LOVE}}\n기획 노현서 · 개발 정순원\n그리고 오늘 함께한 창현, 태진',
-  '{{MUSIC}}\n모차르트 · 슈만 · 쇼팽 · 바흐 · 파헬벨\n연주: Musopen(Donald Betts 외), Kimiko Ishizaka(CC0),\n미 공군 악단 (모두 퍼블릭 도메인)',
+  '{{MUSIC}}\n바흐 · 슈만 · 쇼팽 · 파헬벨\n연주: Musopen(Donald Betts 외), Kimiko Ishizaka(CC0),\n미 공군 악단 (모두 퍼블릭 도메인)',
   '{{THE FINAL MOMENT}}\n{{2006 → 2026}}',
   '20년 전, 교수님과 저희의 이야기가 시작되었습니다.\n그리고 오늘, 교수님의 새로운 시작을 축하합니다.',
 ];
