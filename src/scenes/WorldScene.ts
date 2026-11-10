@@ -266,6 +266,8 @@ export class WorldScene extends Phaser.Scene {
         bubbleY = sprite.y - sprite.displayHeight * sprite.originY - 2;
       }
 
+      if (it.dance && sprite) this.startDance(sprite);
+
       if (it.float && sprite) {
         this.tweens.add({ targets: sprite, y: sprite.y - 3, duration: 900, ease: 'Sine.easeInOut', yoyo: true, repeat: -1 });
       }
@@ -277,6 +279,47 @@ export class WorldScene extends Phaser.Scene {
         .setVisible(false);
       this.entries.push({ it, rect, sprite, bubble, bubbleY });
     }
+  }
+
+  /**
+   * 제자리 브레이크 댄스 (701호 태진): 탑락 → 회전 → 헤드스핀(거꾸로) → 프리즈를 반복한다.
+   * 대화 중에는 멈추고 바로 서서 교수님을 본다.
+   */
+  private startDance(spr: Phaser.GameObjects.Image) {
+    const baseX = spr.x;
+    const baseY = spr.y;
+    const spin = ['down_0', 'right_0', 'up_0', 'left_0'];
+    let t = 0;
+    this.time.addEvent({
+      delay: 110,
+      loop: true,
+      callback: () => {
+        if (this.isBusy()) {
+          spr.setFlipY(false).setPosition(baseX, baseY);
+          return;
+        }
+        const i = t++ % 56;
+        if (i < 16) {
+          // 탑락: 좌우로 스텝을 밟으며 들썩
+          spr.setFlipY(false).setFrame(i % 2 ? 'down_1' : 'down_2');
+          spr.setPosition(baseX + (i % 4 < 2 ? -2 : 2), baseY - (i % 2));
+        } else if (i < 32) {
+          // 회전: 몸을 돌리며 통통 튄다
+          spr.setFlipY(false).setFrame(spin[i % 4]);
+          spr.setPosition(baseX, baseY - (i % 2 ? 3 : 0));
+        } else if (i < 48) {
+          // 헤드스핀: 거꾸로 서서 빙글빙글
+          spr.setFlipY(true).setFrame(spin[i % 4]);
+          spr.setPosition(baseX + (i % 2 ? 1 : -1), baseY);
+        } else if (i < 55) {
+          // 프리즈: 거꾸로 멈춘 채 포즈
+          spr.setFlipY(true).setFrame('left_0').setPosition(baseX, baseY);
+        } else {
+          // 착지!
+          spr.setFlipY(false).setFrame('down_0').setPosition(baseX, baseY - 4);
+        }
+      },
+    });
   }
 
   /** 습득한 아이템처럼 `hideIf` 플래그가 켜진 대상은 사라진 것으로 본다 */

@@ -19,7 +19,7 @@ export const SCRIPTS: Record<string, Script> = {
       text: '전경란 교수님이 주문하신 피자인데, 학생들이 기다리고 있대요!',
       choices: [
         { label: '702호요? 제가 잘 알죠!', next: 'yes' },
-        { label: '또 피자 시켜주셨나 봐요!', next: 'yes2' },
+        { label: '우리 아이들이 기다리고 있어요!', next: 'yes2' },
       ],
     },
     yes: {
@@ -45,7 +45,7 @@ export const SCRIPTS: Record<string, Script> = {
     start: {
       speaker: '교수님',
       portrait: 'professor',
-      text: '하하, 다들 맛있게 먹어요. 우리 702호에서 마저 이야기해요.',
+      text: '하하, 다들 맛있게 먹어요.',
     },
   },
   pizza_after: {
@@ -75,7 +75,7 @@ export const SCRIPTS: Record<string, Script> = {
       text: '[아직 쓰이지 않은 마지막 장]\n\n2006년, 702호에서 시작된 이야기가 있다.',
       next: 'b',
     },
-    b: { text: '스무 해가 흘렀지만,\n그 이야기에는 여전히 진행 중이다.', next: 'c' },
+    b: { text: '스무 해가 흘렀지만,\n그 이야기에는 여전히 진행중이다.', next: 'c' },
     c: {
       text: '오래전 닫힌 문을 다시 두드리면,\n그다음 이야기가 열릴지도 모른다.',
       choices: [{ label: '702호로 향하기', next: 'go' }],
@@ -84,12 +84,12 @@ export const SCRIPTS: Record<string, Script> = {
   },
   mem_vending: {
     start: {
-      text: '자판기가 윙— 하고 돌아가고 있다.\n수업 사이사이 목을 축이던 그 자판기일지도.\n(임시 문구: 추억 이벤트 자리)',
+      text: '자판기가 윙— 하고 돌아가고 있다.\n수업 사이사이 목을 축이던 그 자판기일지도.\n우유가 맛있었다는 소문이...',
     },
   },
   mem_bench: {
     start: {
-      text: '벤치에 앉으면 그 시절이 떠오른다.\n(임시 문구: 추억 이벤트 자리)',
+      text: '벤치에 앉으면 그 시절이 떠오른다.\n날씨가 좋을때 야외 수업이 기억에 남는다.',
     },
   },
 
@@ -97,12 +97,12 @@ export const SCRIPTS: Record<string, Script> = {
   parfait_sign: {
     start: {
       portrait: 'parfait',
-      text: '[수덕전]\n딸기파르페\n(임시 문구)',
+      text: '[수덕전]\n딸기파르페\n',
     },
   },
   shop_door: {
     start: {
-      text: '수덕전 문은 닫혀 있다.\n가게 앞에서 무언가 반짝인다…\n(임시 문구)',
+      text: '수덕전 문은 닫혀 있다.\n가게 앞에서 무언가 반짝인다…\n',
     },
   },
 
@@ -126,7 +126,7 @@ export const SCRIPTS: Record<string, Script> = {
 
   main_door: {
     start: {
-      text: '본관 문은 아직 열리지 않아요.\n(임시 안내: 오브젝트 대사 확인용)',
+      text: '본관 문은 아직 열리지 않아요.\n',
     },
   },
 
@@ -212,7 +212,69 @@ export const SCRIPTS: Record<string, Script> = {
     a: { speaker: '박성대 교수님', portrait: 'prof_ps', text: '어? 새로 오신 교수님이세요?', next: 'b' },
     b: { speaker: '창현', portrait: 'chick_ch', text: '……저 학생인데요.' },
   },
-  door_701: { start: { text: '701호. 문이 잠겨 있다.' } },
+  // ── 701호: 댄스 동아리 UCDC 연습실, 브레이크 댄스 추는 병아리 태진 ──
+  taejin_dance: {
+    start: {
+      text: '쿵짝쿵짝— 음악 소리 사이로, 병아리 한 마리가 골판지 위에서 빙글빙글 돌고 있다.',
+      next: 'a',
+    },
+    a: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '어?! 교수님! (헤드스핀 하다 벌떡) 이, 이건 땡땡이가 아니라… "신체 활동을 통한 창의성 연구"입니다!',
+      next: 'b',
+    },
+    b: { speaker: '교수님', portrait: 'professor', text: '태진 학생, 그 연구 계획서는 언제 냈어요?', next: 'c' },
+    c: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '…지금 머릿속으로 쓰는 중입니다. 제목은 "헤드스핀이 두피 혈액순환과 학점에 미치는 영향".',
+      next: 'd',
+    },
+    d: { speaker: '교수님', portrait: 'professor', text: '결론부터 말해 볼래요?', next: 'e' },
+    e: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '혈액순환은 좋아지는데요… 학점도 같이 돌아갑니다. 빙글빙글~',
+      choices: [
+        { label: 'UCDC가 뭐예요?', next: 'ucdc' },
+        { label: '나도 한 번 춰 볼까요?', next: 'try' },
+      ],
+    },
+    ucdc: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '저희 댄스 동아리 UCDC요! 뜻은… 선배들도 잘 몰라요. 근데 이름이 멋있어서 다들 그냥 씁니다.',
+      next: 'ucdc2',
+    },
+    ucdc2: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '교수님 오시는 줄 알았으면, 복도부터 윈드밀로 돌면서 마중 나갔을 텐데요!',
+      next: 'ucdc3',
+    },
+    ucdc3: { speaker: '교수님', portrait: 'professor', text: '복도는 걸어 다니는 곳이에요.', next: 'ucdc4' },
+    ucdc4: { speaker: '태진', portrait: 'chick_ty', text: '…네. 걸어서 돌겠습니다.' },
+    try: { speaker: '교수님', portrait: 'professor', text: '그 빙글빙글 도는 거, 나도 한 번 해 볼까요?', next: 'try2' },
+    try2: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '아, 안 됩니다 교수님! 헤드스핀 하시다 머리 모양 망가지시면… 나중에 큰 행사 사진이 전설로 남습니다!',
+      next: 'try3',
+    },
+    try3: {
+      speaker: '태진',
+      portrait: 'chick_ty',
+      text: '대신 교수님께 바치는 특별 무대를 준비했습니다. 이름하여… "빨간 펜 프리즈"!',
+      next: 'try4',
+    },
+    try4: {
+      text: '태진이 한쪽 날개로 물구나무를 선 채, 다른 날개로 허공에 빨간 동그라미를 크게 그린다.',
+      next: 'try5',
+    },
+    try5: { speaker: '교수님', portrait: 'professor', text: '…동그라미는 잘 그렸네요. 띄어쓰기도 맞았고.', next: 'try6' },
+    try6: { speaker: '태진', portrait: 'chick_ty', text: '감사합니다! 오늘 연습은 이걸로 A+ 받은 걸로 하겠습니다! (다시 빙글빙글)' },
+  },
   door_703: { start: { text: '703호. 안쪽이 조용하다. 지금은 아무도 없는 것 같다.' } },
   door_702: {
     start: {

@@ -50,6 +50,8 @@ export interface Interactable {
   h?: number;
   /** 그려질 스프라이트 (없으면 보이지 않는 영역, 예: 건물 문) */
   texture?: string;
+  /** true 면 제자리에서 쉬지 않고 브레이크 댄스를 춘다 (701호 태진). 말을 걸면 잠시 멈춘다 */
+  dance?: boolean;
   /** true 면 가까이 가지 않아도 머리 위에 느낌표가 계속 떠 있다 (이상한 소리가 나는 수풀 등) */
   beacon?: boolean;
   /** true 면 말을 걸어도 NPC가 플레이어를 돌아보지 않는다 (둘이 대화 중인 NPC를 엿보는 연출) */
@@ -133,7 +135,7 @@ export interface MapData {
   /** 이 맵에서 흐르는 BGM */
   music: BgmName;
   /** 실내 바닥/벽 스타일: wood(연구실), hall(복도) */
-  style?: 'wood' | 'hall';
+  style?: 'wood' | 'hall' | 'dance';
   /** 꽃 장식 개수 (야외). 기본 260 */
   flowerCount?: number;
   /** 다른 맵에 있는 목표를 향할 때 이 맵에서 가야 할 문 위치 (화살표 안내용) */

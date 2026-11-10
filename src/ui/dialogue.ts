@@ -32,7 +32,7 @@ const PAUSE_WEAK = 70; // , 줄바꿈
 
 /**
  * 화면 하단 대화창 (DOM이라 한글이 선명함).
- * - 글자가 한 자씩 나타나며, 탭/클릭 또는 Space·Enter·E 로 넘김 (타이핑 중이면 먼저 전체 표시)
+ * - 글자가 한 자씩 나타나며, 화면 아무 곳이나 탭/클릭 또는 Space·Enter·E 로 넘김 (타이핑 중이면 먼저 전체 표시)
  * - 선택지는 터치/클릭, 숫자키(1·2), 방향키(↑↓/W·S) + Enter 로 선택
  */
 class DialogueUI {
@@ -50,6 +50,17 @@ class DialogueUI {
   private selected = 0;
   private bound = false;
   private keyHandler = (e: KeyboardEvent) => this.handleKey(e);
+  private openedAt = 0;
+  /** 대화창 밖(게임 화면 아무 곳)을 눌러도 다음으로 넘긴다 (아이패드) */
+  private tapHandler = (e: PointerEvent) => {
+    if (!this.isOpen || this.choiceCount !== 0) return;
+    // 대화를 연 바로 그 탭이 곧바로 첫 줄을 넘기지 않도록
+    if (performance.now() - this.openedAt < 250) return;
+    // 소리 버튼, 사진·만화 같은 다른 화면 위의 버튼은 그대로 동작하게 둔다
+    const t = e.target as HTMLElement | null;
+    if (t?.closest('button, .overlay:not([hidden]), #hud')) return;
+    this.advance();
+  };
 
   private get root() {
     return document.getElementById('dialogue') as HTMLDivElement;
@@ -122,6 +133,8 @@ class DialogueUI {
     }
     this.root.hidden = false;
     this.isOpen = true;
+    this.openedAt = performance.now();
+    window.addEventListener('pointerdown', this.tapHandler);
     document.body.classList.add('in-dialogue');
     window.addEventListener('keydown', this.keyHandler);
   }
@@ -137,6 +150,7 @@ class DialogueUI {
     this.closedAt = performance.now();
     document.body.classList.remove('in-dialogue');
     window.removeEventListener('keydown', this.keyHandler);
+    window.removeEventListener('pointerdown', this.tapHandler);
   }
 
   private showText(node: DNode) {

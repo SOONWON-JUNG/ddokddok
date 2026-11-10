@@ -181,6 +181,7 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
   const { w, h, ground } = map;
   const key = `ground_${map.id}`;
   const hall = map.style === 'hall';
+  const dance = map.style === 'dance';
   if (!scene.textures.exists(key)) {
     const tex = scene.textures.createCanvas(key, w * TILE, h * TILE)!;
     const ctx = tex.context;
@@ -195,7 +196,18 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
         const px = x * TILE;
         const py = y * TILE;
         if (ground[y][x] === 0) {
-          if (hall) {
+          if (dance) {
+            // 댄스 연습실: 밝은 원목 마루 + 바닥에 붙인 동선 테이프
+            rect(px, py, TILE, TILE, y % 2 === 0 ? '#e6c896' : '#dfc08c');
+            rect(px, py + TILE - 1, TILE, 1, '#c9a46e');
+            rect(px + ((y % 2) * 8 + 4), py, 1, TILE - 1, '#d4b07a');
+            rect(px + 3, py + 3, 3, 1, '#f0d6aa');
+            if ((x === 5 || x === 15) && y === 7) {
+              rect(px + 4, py + 7, 8, 2, '#ff5fa2');
+              rect(px + 7, py + 4, 2, 8, '#ff5fa2');
+            }
+            if (y === WALL_ROWS) rect(px, py, TILE, 5, 'rgba(0,0,0,0.18)');
+          } else if (hall) {
             // 복도: 연한 회색 타일 바닥 + 은은한 광택
             rect(px, py, TILE, TILE, (x + y) % 2 === 0 ? '#d9d3c5' : '#cfc9ba');
             rect(px, py + TILE - 1, TILE, 1, '#b9b3a4');
@@ -211,7 +223,18 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
             if (y === WALL_ROWS) rect(px, py, TILE, 5, 'rgba(0,0,0,0.14)'); // 벽 아래 그림자
           }
         } else if (y < WALL_ROWS && x > 0 && x < w - 1) {
-          if (hall) {
+          if (dance) {
+            // 짙은 보라 벽 + 분홍·하늘 네온 줄 + 검은 걸레받이
+            rect(px, py, TILE, TILE, '#2e2448');
+            rect(px + 7, py, 1, TILE, '#352a52');
+            if (y === 0) rect(px, py, TILE, 3, '#241b3a');
+            if (y === 1) rect(px, py + 13, TILE, 1, '#ff5fa2');
+            if (y === 2) rect(px, py, TILE, 1, '#5fd3ff');
+            if (y === WALL_ROWS - 1) {
+              rect(px, py + TILE - 5, TILE, 5, '#16121f');
+              rect(px, py + TILE - 5, TILE, 1, '#3d3360');
+            }
+          } else if (hall) {
             // 복도 벽: 위는 연한 회벽, 아래는 초록 하단 벽(학교 복도 느낌) + 걸레받이
             if (y < 2) {
               rect(px, py, TILE, TILE, '#ece7d9');
@@ -240,9 +263,9 @@ function drawIndoorGround(scene: Phaser.Scene, map: MapData) {
           }
         } else {
           // 옆벽·아래벽
-          rect(px, py, TILE, TILE, hall ? '#6d6a60' : '#6d4a33');
-          rect(px, py, TILE, 1, hall ? '#8a877b' : '#8a6247');
-          rect(px, py + TILE - 1, TILE, 1, hall ? '#4f4d45' : '#523725');
+          rect(px, py, TILE, TILE, dance ? '#2a2238' : hall ? '#6d6a60' : '#6d4a33');
+          rect(px, py, TILE, 1, dance ? '#3d3360' : hall ? '#8a877b' : '#8a6247');
+          rect(px, py + TILE - 1, TILE, 1, dance ? '#16121f' : hall ? '#4f4d45' : '#523725');
         }
       }
     }

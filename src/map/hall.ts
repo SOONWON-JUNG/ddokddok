@@ -50,7 +50,8 @@ export function buildHall(): MapData {
       w: 2,
       h: 2,
       texture: 'door_701',
-      action: { type: 'dialogue', script: 'door_701' },
+      // 701호: 댄스 동아리 UCDC 연습실로 들어간다
+      action: { type: 'door', toMap: 'room701', toSpawn: 'from_hall' },
     },
     // 박성대 교수님과 (병아리가 된) 창현: 서로 마주 보고 이야기 중
     {
@@ -162,10 +163,11 @@ export function buildHall(): MapData {
     decor: [],
     // 산학협력관 안: 2006년
     timeline: { kind: 'fixed', year: 2006 },
-    links: { outdoor: { tx: 2, ty: 3 }, office: { tx: 21, ty: 3 }, garden: { tx: 2, ty: 3 } },
+    links: { outdoor: { tx: 2, ty: 3 }, office: { tx: 21, ty: 3 }, garden: { tx: 2, ty: 3 }, room701: { tx: 17, ty: 3 } },
     spawns: {
       from_outdoor: { tx: 3, ty: 5, facing: 'down' },
       from_office: { tx: 21, ty: 5, facing: 'down' },
+      from_701: { tx: 17, ty: 5, facing: 'down' },
     },
   };
 }

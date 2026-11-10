@@ -466,4 +466,129 @@ export function makeStoryTextures(scene: Phaser.Scene) {
     shadow(ctx, 18, 43, 16, 2.4);
     tex.refresh();
   }
+
+  // ───────────────────────── 701호 댄스 동아리 연습실 (UCDC) ─────────────────────────
+
+  // 벽 전신 거울 (30x28): 연습실 느낌의 은빛 거울 + 비스듬한 반사광
+  {
+    const { tex, ctx, r } = make('mirror_wall', 30, 28);
+    r(0, 0, 30, 28, '#5a5f70');
+    r(1, 1, 28, 26, '#bfd3e3');
+    r(1, 1, 28, 8, '#d6e5f0');
+    for (let i = 0; i < 6; i++) r(6 + i, 3 + i * 3, 2, 3, '#f2f8fc');
+    for (let i = 0; i < 4; i++) r(17 + i, 6 + i * 3, 1, 3, '#eef5fa');
+    outline(ctx, 30, 28);
+    tex.refresh();
+  }
+
+  // "UCDC" 현수막 (80x18): 보라 바탕에 노란 큰 글자 + 별
+  {
+    const { tex, ctx, r } = make('ucdc_banner', 80, 18);
+    r(0, 0, 80, 18, '#2b1f4a');
+    r(0, 0, 80, 2, '#ff5fa2');
+    r(0, 16, 80, 2, '#5fd3ff');
+    const G: Record<string, string[]> = {
+      U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+      C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+      D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+    };
+    [...'UCDC'].forEach((ch, i) => {
+      G[ch].forEach((row, y) =>
+        [...row].forEach((v, x) => {
+          if (v === '1') {
+            r(19 + i * 11 + x * 2, 2 + y * 2 - 1, 2, 2, '#ffd25e');
+          }
+        }),
+      );
+    });
+    for (const [x, y] of [[5, 7], [72, 6], [10, 12], [68, 12]] as const) {
+      r(x, y, 1, 3, '#fff6d8');
+      r(x - 1, y + 1, 3, 1, '#fff6d8');
+    }
+    outline(ctx, 80, 18);
+    tex.refresh();
+  }
+
+  // 미러볼 (12x16): 천장에 매달린 반짝이는 공
+  {
+    const { tex, ctx, r } = make('disco_ball', 12, 16);
+    r(5, 0, 1, 4, '#8a8a9a');
+    disc(ctx, 6, 9, 5, '#c9ced8');
+    for (let y = 5; y <= 13; y += 2) for (let x = 2; x <= 10; x += 2) if ((x + y) % 4 === 1) r(x, y, 1, 1, '#ffffff');
+    r(3, 6, 2, 2, '#e9f3ff');
+    outline(ctx, 12, 16);
+    tex.refresh();
+  }
+
+  // 큰 스피커 (16x26)
+  {
+    const { tex, ctx, r } = make('speaker', 16, 26);
+    r(0, 0, 16, 26, '#24222c');
+    r(1, 1, 14, 24, '#33303c');
+    disc(ctx, 8, 7, 4, '#16151b');
+    disc(ctx, 8, 7, 2, '#4a4656');
+    disc(ctx, 8, 18, 5, '#16151b');
+    disc(ctx, 8, 18, 2, '#4a4656');
+    r(6, 2, 4, 1, '#5fd3ff');
+    outline(ctx, 16, 26);
+    shadow(ctx, 8, 25, 8, 2);
+    tex.refresh();
+  }
+
+  // 붐박스(카세트 라디오) (24x14)
+  {
+    const { tex, ctx, r } = make('boombox', 24, 14);
+    r(4, 0, 16, 2, '#4a4656');
+    r(0, 2, 24, 12, '#c9473a');
+    r(1, 3, 22, 3, '#e05a4c');
+    disc(ctx, 5, 9, 3, '#24222c');
+    disc(ctx, 19, 9, 3, '#24222c');
+    r(9, 7, 6, 4, '#24222c');
+    r(10, 8, 4, 2, '#8fe0ff');
+    outline(ctx, 24, 14);
+    shadow(ctx, 12, 13, 12, 2);
+    tex.refresh();
+  }
+
+  // 브레이크댄스용 박스 깔판 (44x22): 바닥에 깔린 골판지
+  {
+    const { tex, r } = make('cardboard', 44, 22);
+    r(0, 2, 44, 18, '#c49a5e');
+    r(0, 2, 44, 2, '#d6ad70');
+    r(21, 2, 2, 18, '#a97f48');
+    r(4, 6, 10, 1, '#a97f48');
+    r(28, 13, 12, 1, '#a97f48');
+    r(30, 6, 8, 4, '#e8d3a8'); // 테이프
+    tex.refresh();
+  }
+
+  // 무대 조명이 바닥에 비치는 동그란 빛 (분홍, 하늘)
+  for (const [key, col] of [['spot_pink', '255,95,162'], ['spot_cyan', '95,211,255']] as const) {
+    const { tex, ctx } = make(key, 48, 24);
+    const g = ctx.createRadialGradient(24, 12, 2, 24, 12, 24);
+    g.addColorStop(0, `rgba(${col},0.38)`);
+    g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g;
+    ctx.save();
+    ctx.scale(1, 0.5);
+    ctx.beginPath();
+    ctx.arc(24, 24, 24, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    tex.refresh();
+  }
+
+  // UCDC 공연 포스터 (14x18)
+  {
+    const { tex, ctx, r } = make('poster_ucdc', 14, 18);
+    r(0, 0, 14, 18, '#2b1f4a');
+    r(1, 1, 12, 16, '#3d2c66');
+    disc(ctx, 7, 7, 3, '#ffd25e');
+    r(6, 10, 2, 4, '#ffd25e');
+    r(3, 11, 3, 1, '#ff5fa2');
+    r(8, 12, 3, 1, '#5fd3ff');
+    r(2, 15, 10, 1, '#ff5fa2');
+    outline(ctx, 14, 18);
+    tex.refresh();
+  }
 }

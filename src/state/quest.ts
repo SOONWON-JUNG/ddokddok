@@ -55,7 +55,7 @@ export const QUEST: QuestStep[] = [
     id: 'knock',
     done: 'knocked',
     text: '복도 끝 702호 연구실 문을 두드려 보세요',
-    target: { map: 'hall', tx: 24, ty: 3 },
+    target: { map: 'hall', tx: 21, ty: 3 },
   },
   {
     id: 'office',

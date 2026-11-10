@@ -12,10 +12,12 @@
  */
 
 /** outdoor=비탈길, hall=복도(702호 앞), office=연구실(회상), paper=교수님 첨삭, garden=보물상자, ending=크레딧 (indoor 는 합성음 예비용) */
-export type BgmName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'hall' | 'office' | 'paper';
+export type BgmName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'hall' | 'office' | 'paper' | 'dance';
+
+type SynthName = 'outdoor' | 'indoor' | 'garden' | 'ending' | 'dance';
 
 /** 음원 파일이 없을 때 대신 쓰는 합성음 트랙 */
-const SYNTH_FOR: Record<BgmName, 'outdoor' | 'indoor' | 'garden' | 'ending'> = {
+const SYNTH_FOR: Record<BgmName, SynthName> = {
   outdoor: 'outdoor',
   indoor: 'indoor',
   garden: 'garden',
@@ -23,6 +25,7 @@ const SYNTH_FOR: Record<BgmName, 'outdoor' | 'indoor' | 'garden' | 'ending'> = {
   hall: 'indoor',
   office: 'indoor',
   paper: 'indoor',
+  dance: 'dance',
 };
 /** 같은 음원 파일을 함께 쓰는 이름 (크레딧은 보물상자 음악을 끊김 없이 이어서 틀어 준다) */
 const FILE_ALIAS: Partial<Record<BgmName, BgmName>> = { ending: 'garden' };
@@ -76,7 +79,27 @@ function melody(notes: Record<number, number>): (number | null)[] {
   return out;
 }
 
-const TRACKS: Record<'outdoor' | 'indoor' | 'garden' | 'ending', Track> = {
+const TRACKS: Record<SynthName, Track> = {
+  // 701호 댄스 동아리: 통통 튀는 펑키 비트 (A단조, 엇박 베이스)
+  dance: {
+    bpm: 112,
+    steps: 32,
+    lead: melody({ 0: 12, 3: 10, 6: 7, 8: 10, 11: 12, 14: 15, 16: 12, 19: 10, 22: 7, 24: 5, 26: 7, 28: 3, 30: 0 }),
+    bass: (() => {
+      const out: (number | null)[] = Array(32).fill(null);
+      [0, -2, -4, -2].forEach((root, bar) => {
+        for (const [off, add] of [[0, 0], [3, 0], [6, 12], [7, 0]] as const) out[bar * 8 + off] = root + add;
+      });
+      return out;
+    })(),
+    leadBase: 69,
+    bassBase: 45,
+    leadWave: 'square',
+    bassWave: 'sawtooth',
+    leadVol: 0.04,
+    bassVol: 0.07,
+    leadLen: 0.8,
+  },
   // 본관 앞~비탈길: 가볍고 밝은 걷기 음악 (C장조)
   outdoor: {
     bpm: 100,

@@ -26,7 +26,7 @@ export const CARDS: Record<string, CardOptions> = {
   },
   book_end: {
     hideMedia: true,
-    text: '혹시 내가...\n게임 속에 있는건 아니겠지? 기분 탓이겠지!.',
+    text: '혹시 내가...\n게임 속에 있는건 아니겠지? 기분 탓이겠지!',
     button: '닫기',
   },
   // 학과 게시판에 붙어 있는 쪽지
@@ -59,6 +59,13 @@ export const CARDS: Record<string, CardOptions> = {
   cal_2014: { calendar: true, hideMedia: true, caption: '2014', button: '다음 장' },
   cal_2026: { calendar: true, hideMedia: true, caption: '2026', button: '다음 장' },
   cal_end: { calendar: true, hideMedia: true, text: '그다음 페이지는\n아직 쓰이지 않았다.', button: '닫기' },
+  // 701호 UCDC 연습실 포스터
+  poster_ucdc: {
+    poster: '#c9a0ff',
+    hideMedia: true,
+    caption: 'UCDC\n정기 공연',
+    text: '신입 부원 모집 중!\n연습: 매일 밤 9시 · 산학협력관 701호\n"춤은 몰라도 돼요. 박자는 저희가 맞춰 드립니다."',
+  },
   wedding: {
     src: 'images/wedding.jpg',
     kind: 'wedding',

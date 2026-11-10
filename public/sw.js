@@ -4,7 +4,7 @@
  * - 화면(HTML)은 "인터넷 먼저, 안 되면 저장본", 나머지 파일은 "저장본 먼저"로 동작한다.
  * - 새 버전을 배포했는데 예전 파일이 보이면 아래 VERSION 숫자를 올리면 된다.
  */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `ddokddok-${VERSION}`;
 
 self.addEventListener('install', (e) => {
