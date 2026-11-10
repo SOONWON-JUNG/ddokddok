@@ -5,6 +5,9 @@
  * - BGM은 `public/audio/bgm_<이름>.m4a`(또는 .mp3) 파일을 넣으면 그 파일이 우선 재생된다.
  *   (무료 음원을 쓰고 싶을 때: 파일만 넣으면 됨. 이름: outdoor, indoor, garden, ending)
  * - iPad/Safari는 사용자가 화면을 한 번 터치해야 소리를 낼 수 있으므로, 타이틀의 시작 버튼에서 unlock() 한다.
+ * - iPad 에서는 "터치한 순간"이 아니면 새 오디오 재생을 막는다. 그래서 BGM 파일은 시작 버튼에서 재생 허락을 받아 둔
+ *   오디오 하나(musicEl)만 쓰고, 장면이 바뀌면 곡(src)만 바꿔 끼운다. 이 오디오는 Web Audio 에 연결해 볼륨을 조절한다
+ *   (iPad 는 오디오의 volume 값을 무시하기 때문).
  * - 오른쪽 위 🔊 버튼으로 소리를 끌 수 있다 (설정은 기억됨).
  */
 
@@ -139,6 +142,30 @@ const TRACKS: Record<'outdoor' | 'indoor' | 'garden' | 'ending', Track> = {
 
 const MUTE_KEY = 'ddokddok.muted';
 
+/** 재생 허락을 받기 위한 아주 짧은 무음 (WAV, 8bit 모노 8kHz 0.1초) */
+const SILENT_WAV = (() => {
+  const n = 800;
+  const bytes = new Uint8Array(44 + n);
+  const dv = new DataView(bytes.buffer);
+  const str = (o: number, t: string) => [...t].forEach((c, i) => (bytes[o + i] = c.charCodeAt(0)));
+  str(0, 'RIFF');
+  dv.setUint32(4, 36 + n, true);
+  str(8, 'WAVEfmt ');
+  dv.setUint32(16, 16, true);
+  dv.setUint16(20, 1, true);
+  dv.setUint16(22, 1, true);
+  dv.setUint32(24, 8000, true);
+  dv.setUint32(28, 8000, true);
+  dv.setUint16(32, 1, true);
+  dv.setUint16(34, 8, true);
+  str(36, 'data');
+  dv.setUint32(40, n, true);
+  bytes.fill(128, 44);
+  let bin = '';
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+  return `data:audio/wav;base64,${btoa(bin)}`;
+})();
+
 class AudioEngine {
   private ctx: AudioContext | null = null;
   private master!: GainNode;
@@ -153,7 +180,11 @@ class AudioEngine {
   private nextTime = 0;
   private step = 0;
 
-  private fileEl: HTMLAudioElement | null = null;
+  /** BGM 파일 재생용 오디오 하나 (unlock 때 만들어 재생 허락을 받아 둔다) */
+  private musicEl: HTMLAudioElement | null = null;
+  private fileGain: GainNode | null = null;
+  /** 지금 musicEl 에 걸려 있는 곡 주소 (null 이면 파일 재생 중 아님) */
+  private fileUrl: string | null = null;
   private fileProbe = new Map<BgmName, Promise<string | null>>();
   private lastStepAt = 0;
 
@@ -190,8 +221,56 @@ class AudioEngine {
       for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       this.noise = buf;
     }
-    void this.ctx.resume();
+    this.prepareMusicElement();
+    this.wake();
     if (this.wanted) this.bgm(this.wanted);
+  }
+
+  /**
+   * 사용자 터치 안에서 BGM 용 오디오를 만들고 무음을 한 번 재생해 둔다.
+   * 이렇게 허락받은 오디오는 이후 터치 없이도 곡을 바꿔 재생할 수 있다 (iPad Safari).
+   */
+  private prepareMusicElement() {
+    if (this.musicEl || !this.ctx) return;
+    // 무음 스위치가 켜져 있어도 소리가 나게 (지원하는 Safari 에서만)
+    try {
+      const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+      if (session) session.type = 'playback';
+    } catch {
+      /* 지원하지 않음 */
+    }
+    const el = new Audio();
+    el.loop = true;
+    el.preload = 'auto';
+    el.setAttribute('playsinline', '');
+    el.src = SILENT_WAV;
+    void el.play().catch(() => undefined);
+    this.musicEl = el;
+    try {
+      const src = this.ctx.createMediaElementSource(el);
+      this.fileGain = this.ctx.createGain();
+      this.fileGain.gain.value = 0;
+      src.connect(this.fileGain);
+      this.fileGain.connect(this.master);
+    } catch {
+      this.fileGain = null; // 연결할 수 없는 브라우저: 오디오 자체 볼륨을 쓴다
+    }
+    // 화면을 다시 만지거나 앱으로 돌아오면 멈춘 소리를 깨운다
+    const wake = () => this.wake();
+    window.addEventListener('pointerdown', wake, true);
+    window.addEventListener('keydown', wake, true);
+    window.addEventListener('touchend', wake, true);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) this.wake();
+    });
+  }
+
+  /** 멈춘(또는 iPad 에서 끊긴) 소리 장치와 BGM 을 다시 재생한다 */
+  private wake() {
+    if (!this.ctx) return;
+    if (this.ctx.state !== 'running') void this.ctx.resume().catch(() => undefined);
+    const el = this.musicEl;
+    if (el && this.fileUrl && el.paused) void el.play().catch(() => undefined);
   }
 
   setMuted(m: boolean) {
@@ -202,7 +281,7 @@ class AudioEngine {
       /* 무시 */
     }
     if (this.ctx) this.master.gain.setTargetAtTime(m ? 0 : 0.7, this.ctx.currentTime, 0.03);
-    if (this.fileEl) this.fileEl.muted = m;
+    if (this.musicEl && !this.fileGain) this.musicEl.muted = m;
   }
 
   toggleMute() {
@@ -218,7 +297,7 @@ class AudioEngine {
     if (!this.ctx) return; // 아직 unlock 전: unlock 때 다시 호출됨
     if (name === this.current) return;
     // 같은 음원 파일을 쓰는 장면으로 넘어갈 때는 끊지 않고 이어서 틀어 준다
-    if (name && this.current && this.fileEl && (FILE_ALIAS[name] ?? name) === (FILE_ALIAS[this.current] ?? this.current)) {
+    if (name && this.current && this.fileUrl && (FILE_ALIAS[name] ?? name) === (FILE_ALIAS[this.current] ?? this.current)) {
       this.current = name;
       return;
     }
@@ -267,19 +346,36 @@ class AudioEngine {
 
   /** 비밀 정원(보물상자, 엔딩)은 원래 볼륨, 나머지 장면은 30% 낮춘다 */
   private playFile(url: string, name: BgmName) {
-    const el = new Audio(url);
+    const el = this.musicEl;
+    if (!el || !this.ctx) return;
+    const vol = name === 'garden' || name === 'ending' ? 0.55 : 0.55 * 0.7;
+    this.fileUrl = url;
+    if (!el.src.endsWith(url)) el.src = url;
     el.loop = true;
-    el.volume = name === 'garden' || name === 'ending' ? 0.55 : 0.55 * 0.7;
-    el.muted = this.muted;
-    this.fileEl = el;
+    el.currentTime = 0;
+    if (this.fileGain) {
+      // 전체 볼륨(master 0.7)을 거치므로 그만큼 보정해 예전과 같은 크기로 맞춘다
+      const g = this.fileGain.gain;
+      g.cancelScheduledValues(this.ctx.currentTime);
+      g.setValueAtTime(0, this.ctx.currentTime);
+      g.linearRampToValueAtTime(vol / 0.7, this.ctx.currentTime + 0.6);
+    } else {
+      el.volume = vol;
+      el.muted = this.muted;
+    }
+    // 막히면(아이패드 자동 재생 차단) 다음 터치 때 wake() 가 다시 재생한다
     void el.play().catch(() => undefined);
   }
 
   private stopFile() {
-    if (this.fileEl) {
-      this.fileEl.pause();
-      this.fileEl = null;
+    this.fileUrl = null;
+    const el = this.musicEl;
+    if (!el) return;
+    if (this.fileGain && this.ctx) {
+      this.fileGain.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.fileGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
     }
+    el.pause();
   }
 
   private schedule(name: BgmName) {

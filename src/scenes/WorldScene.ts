@@ -23,6 +23,7 @@ import { clearSave, writeSave, type SaveData } from '../save/save';
 import { gameState } from '../state/gameState';
 import { QUEST_DONE_TEXT, currentStep } from '../state/quest';
 import { findPath, nearestWalkable, type Point } from '../systems/pathfinding';
+import { heldDirection } from '../systems/keys';
 import { dialogue } from '../ui/dialogue';
 import { SeasonEffects } from '../effects/seasonEffects';
 import { PuppyFollower } from '../entities/puppy';
@@ -74,8 +75,6 @@ export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
   private marker!: Phaser.GameObjects.Image;
   private arrow!: Phaser.GameObjects.Graphics;
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private wasd!: Record<'W' | 'A' | 'S' | 'D', Phaser.Input.Keyboard.Key>;
 
   private entries: Entry[] = [];
   private facing: Dir = 'down';
@@ -176,8 +175,6 @@ export class WorldScene extends Phaser.Scene {
     this.yearShown = -1;
     this.updateYear(0);
 
-    this.cursors = this.input.keyboard!.createCursorKeys();
-    this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as WorldScene['wasd'];
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => this.onTap(p));
 
     window.addEventListener('keydown', this.onKey);
@@ -220,6 +217,7 @@ export class WorldScene extends Phaser.Scene {
       (window as unknown as { __ddok: unknown }).__ddok = {
         scene: this,
         gameState,
+        audio,
         // 테스트용 순간이동 (칸 좌표)
         tp: (tx: number, ty: number) => {
           this.player.setPosition(tx * TILE + TILE / 2, ty * TILE + TILE / 2);
@@ -1199,12 +1197,8 @@ export class WorldScene extends Phaser.Scene {
 
     if (!this.isBusy()) {
       // 키보드가 있으면 키보드 우선, 없으면 탭 경로
-      let kx = 0;
-      let ky = 0;
-      if (this.cursors.left.isDown || this.wasd.A.isDown) kx -= 1;
-      if (this.cursors.right.isDown || this.wasd.D.isDown) kx += 1;
-      if (this.cursors.up.isDown || this.wasd.W.isDown) ky -= 1;
-      if (this.cursors.down.isDown || this.wasd.S.isDown) ky += 1;
+      // 맵이 바뀌어도 누르고 있던 방향키를 그대로 이어받는다 (systems/keys.ts)
+      const { x: kx, y: ky } = heldDirection();
 
       if (kx !== 0 || ky !== 0) {
         if (this.path.length || this.pending) this.clearPath();
