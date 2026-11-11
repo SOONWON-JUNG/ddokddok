@@ -215,9 +215,9 @@ export function buildOutdoor(): MapData {
       action: { type: 'dialogue', script: 'main_door' },
     },
     // 이상한 소리 퀘스트: 겁먹은 신입생(진행에 따라 대사가 바뀌는 같은 자리의 NPC 4개) + 본관 왼쪽 수풀
-    { id: 'npc_scared', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', hideIf: 'met_scared', action: { type: 'dialogue', script: 'scared_intro', set: { met_scared: true } } },
-    { id: 'npc_scared_wait', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', showIf: 'met_scared', hideIf: 'puppy_found', action: { type: 'dialogue', script: 'scared_wait' } },
-    { id: 'npc_scared_react', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', showIf: 'puppy_found', hideIf: 'puppy_reported', action: { type: 'dialogue', script: 'scared_react_a', cutscene: 'npc_puppy_react' } },
+    { id: 'npc_scared', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', tremble: true, hideIf: 'met_scared', action: { type: 'dialogue', script: 'scared_intro', set: { met_scared: true } } },
+    { id: 'npc_scared_wait', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', tremble: true, showIf: 'met_scared', hideIf: 'puppy_found', action: { type: 'dialogue', script: 'scared_wait' } },
+    { id: 'npc_scared_react', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', tremble: true, showIf: 'puppy_found', hideIf: 'puppy_reported', action: { type: 'dialogue', script: 'scared_react_a', cutscene: 'npc_puppy_react' } },
     { id: 'npc_scared_after', kind: 'npc', tx: 42, ty: 18, texture: 'npc_student', facing: 'down', showIf: 'puppy_reported', action: { type: 'dialogue', script: 'scared_after' } },
     {
       id: 'bush_sound',

@@ -19,6 +19,8 @@ export type CutStep =
   | { type: 'spawn'; id: string; texture: string; at: { tx: number; ty: number }; facing?: Dir; label?: string; visible?: boolean; scale?: number }
   /** 폴짝 뛰며 박수 친다 (times 번) */
   | { type: 'clap'; ids: string[]; times?: number }
+  /** 덜덜 떨던 캐릭터가 진정한다 (Interactable.tremble 멈춤) */
+  | { type: 'calm'; ids: string[] }
   /** 캐릭터들이 대상 주변으로 모여든다. stagger(ms) 간격으로 차례로 출발 */
   | { type: 'gather'; ids: string[]; around: string; radius?: number; stagger?: number }
   /** 대상을 바라보게 한다 */
@@ -119,6 +121,7 @@ export const CUTSCENES: Record<string, CutStep[]> = {
   board_note: [
     { type: 'card', card: 'board_note' },
     { type: 'card', card: 'board_note_changhyun' },
+    { type: 'card', card: 'board_note_hyeyoung' },
     { type: 'card', card: 'board_note_chick' },
   ],
 
@@ -139,6 +142,7 @@ export const CUTSCENES: Record<string, CutStep[]> = {
   npc_puppy_react: [
     { type: 'wait', ms: 250 },
     { type: 'emote', ids: ['npc_scared_react'], kind: 'excl' },
+    { type: 'calm', ids: ['npc_scared_react'] },
     { type: 'clap', ids: ['npc_scared_react'], times: 2 },
     { type: 'puppy', act: 'bark' },
     { type: 'wait', ms: 400 },

@@ -146,7 +146,7 @@ export const SCRIPTS: Record<string, Script> = {
       text: '[디지털콘텐츠학과 게시판]\n초록 게시판 가득 공지문과 종이가 붙어 있다. 한쪽에는 DICON 화살표가 그려져 있다.',
       next: 'memo',
     },
-    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 세 장이 붙어 있다.' },
+    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 네 장이 붙어 있다.' },
   },
   // ── 이상한 소리 퀘스트 (겁먹은 신입생 + 강아지) ──
   scared_intro: {
@@ -418,7 +418,7 @@ export const SCRIPTS: Record<string, Script> = {
       next: 'letter',
     },
     letter: {
-      text: '그런데 과제 더미 옆에, 아까는 없던 편지 한 통이 놓여 있다.\n봉투에는 "교수님께"라고 적혀 있다.',
+      text: '그런데 과제 더미 아래에서 편지 한 통이 툭 떨어졌다.\n봉투에는 "교수님께"라고 적혀 있다. 열어 볼까?',
     },
   },
 

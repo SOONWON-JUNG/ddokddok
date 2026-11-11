@@ -40,6 +40,11 @@ export const CARDS: Record<string, CardOptions> = {
     hideMedia: true,
     text: '교수님, 총장님 되신 것 정말 축하드립니다!\n제자로서 너무 자랑스럽고 든든합니다.\n앞으로 학교를 이끌어가시느라 많이 바빠지시겠지만,\n늘 건강 챙기시면서 승승장구하시길\n마음 깊이 응원하겠습니다.\n\n- 06 창현 -',
   },
+  board_note_hyeyoung: {
+    note: true,
+    hideMedia: true,
+    text: '교수님, 안녕하세요\n11학번 김혜영입니다\n총장님이 되셨다는 소식을 들었어요!\n진심으로 축하드립니다\n항상 학생들에게 늘 따뜻하시고,\n웃는 모습이셨던 교수님 ❤️❤️❤️\n덕분에 저 또한 많이 배우고 성장했습니다\n\n앞으로 학교를 이끌어가실\n교수님의 새로운 시작을 응원하겠습니다!\n\n- 11학번 혜영 -',
+  },
   board_note_chick: {
     note: true,
     hideMedia: true,

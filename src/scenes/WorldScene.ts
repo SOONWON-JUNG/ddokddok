@@ -78,6 +78,7 @@ export class WorldScene extends Phaser.Scene {
   private arrow!: Phaser.GameObjects.Graphics;
 
   private entries: Entry[] = [];
+  private trembles = new Map<string, { tween: Phaser.Tweens.Tween; sprite: Phaser.GameObjects.Image; x: number }>();
   private facing: Dir = 'down';
   private facingHold = 0;
   private dirX = 0;
@@ -270,6 +271,13 @@ export class WorldScene extends Phaser.Scene {
       }
 
       if (it.dance && sprite) this.startDance(sprite);
+
+      if (it.tremble && sprite) {
+        // 겁에 질려 덜덜: 좌우로 아주 빠르게 떨고, 몸이 살짝 움츠러든다
+        const x0 = sprite.x;
+        const tween = this.tweens.add({ targets: sprite, x: x0 + 1.2, duration: 45, yoyo: true, repeat: -1, ease: 'Linear' });
+        this.trembles.set(it.id, { tween, sprite, x: x0 });
+      }
 
       if (it.float && sprite) {
         this.tweens.add({ targets: sprite, y: sprite.y - 3, duration: 900, ease: 'Sine.easeInOut', yoyo: true, repeat: -1 });
@@ -517,6 +525,10 @@ export class WorldScene extends Phaser.Scene {
         gameState.setMany(a.readSet);
         const after = a.after ? SCRIPTS[a.after] : undefined;
         if (after) await dialogue.run(after);
+        if (a.afterCard && CARDS[a.afterCard.card]) {
+          await imageCard.show(CARDS[a.afterCard.card]);
+          gameState.setMany(a.afterCard.set);
+        }
       }
     } else {
       gameState.setMany(a.set);
@@ -606,6 +618,15 @@ export class WorldScene extends Phaser.Scene {
       }
       case 'clap':
         await this.clap(st);
+        break;
+      case 'calm':
+        for (const id of st.ids) {
+          const t = this.trembles.get(id);
+          if (!t) continue;
+          t.tween.stop();
+          t.sprite.x = t.x;
+          this.trembles.delete(id);
+        }
         break;
       case 'puppy':
         await this.puppyAct(st);
@@ -1089,10 +1110,41 @@ export class WorldScene extends Phaser.Scene {
     // 반짝! 사람으로 변한다
     await this.puppyAct({ type: 'puppy', act: 'transform' });
     await this.delay(600);
+    // 정면을 보고 서서, 관객(교수님)께 꾸벅 인사한다
+    await this.bow('man_dev', 2);
+    await this.delay(250);
     this.emote('man_dev', 'heart');
     audio.sfx('fanfare');
     await this.flowerFireworks('man_dev', 5);
     await this.delay(2600);
+  }
+
+  /**
+   * 꾸벅 인사: 정면을 본 채 몸을 앞으로 숙이는 느낌으로 위아래로 눌렀다 천천히 일어선다.
+   * (스프라이트가 정면 한 장뿐이라 눌림 + 살짝 내려앉기로 표현. 마지막은 폴짝 뛰며 환하게)
+   */
+  private async bow(id: string, times: number) {
+    const a = this.actorOf(id);
+    a.setFrame('down_0');
+    const baseY = a.y;
+    for (let n = 0; n < times; n++) {
+      await new Promise<void>((resolve) =>
+        this.tweens.add({ targets: a, scaleY: 0.78, scaleX: 1.08, y: baseY + 2, angle: n % 2 === 0 ? -3 : 3, duration: 420, ease: 'Sine.easeInOut', onComplete: () => resolve() }),
+      );
+      await this.delay(260);
+      await new Promise<void>((resolve) =>
+        this.tweens.add({ targets: a, scaleY: 1, scaleX: 1, y: baseY, angle: 0, duration: 380, ease: 'Sine.easeOut', onComplete: () => resolve() }),
+      );
+      audio.sfx('pop');
+      await this.delay(300);
+    }
+    // 인사를 마치고 기쁘게 폴짝
+    for (let k = 0; k < 2; k++) {
+      await new Promise<void>((resolve) =>
+        this.tweens.add({ targets: a, y: baseY - 5, duration: 130, yoyo: true, onComplete: () => resolve() }),
+      );
+      a.y = baseY;
+    }
   }
 
   /** 꽃폭죽: 하늘로 쏘아 올린 뒤 팡! 하고 꽃잎이 사방으로 터진다 */

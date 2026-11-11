@@ -37,7 +37,7 @@ export type InteractAction =
   /** 이상한 달력: 2006 → 2014 → 2026 → 쓰이지 않은 페이지 (선택형 이스터에그) */
   | { type: 'calendar' }
   /** 과제지를 펼쳐 넘겨 본다 (data/papers.ts). 끝까지 읽으면 readSet 플래그가 켜지고 after 대사가 나온다 */
-  | { type: 'paper'; readSet?: Flags; after?: string };
+  | { type: 'paper'; readSet?: Flags; after?: string; /** after 대사 뒤에 이어서 보여 줄 카드 id (data/cards.ts) */ afterCard?: { card: string; set?: Flags } };
 
 /** 탭/키로 상호작용할 수 있는 NPC·오브젝트·문 */
 export interface Interactable {
@@ -56,6 +56,8 @@ export interface Interactable {
   scale?: number;
   /** true 면 제자리에서 쉬지 않고 브레이크 댄스를 춘다 (701호 태진). 말을 걸면 잠시 멈춘다 */
   dance?: boolean;
+  /** true 면 겁에 질려 제자리에서 덜덜 떤다 (컷신의 calm 단계에서 멈춘다) */
+  tremble?: boolean;
   /** true 면 가까이 가지 않아도 머리 위에 느낌표가 계속 떠 있다 (이상한 소리가 나는 수풀 등) */
   beacon?: boolean;
   /** true 면 말을 걸어도 NPC가 플레이어를 돌아보지 않는다 (둘이 대화 중인 NPC를 엿보는 연출) */
