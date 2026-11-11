@@ -129,7 +129,7 @@ export interface MapData {
   theme: 'outdoor' | 'indoor';
   w: number;
   h: number;
-  /** outdoor: 0 잔디 / 1 길 / 2 계단 / 3 옹벽(통과 불가) · indoor: 0 바닥 / 1 벽 */
+  /** outdoor: 0 잔디 / 1 길 / 2 계단 / 3 옹벽(통과 불가) / 4 연못 물(통과 불가) / 5 정자 나무다리 · indoor: 0 바닥 / 1 벽 */
   ground: number[][];
   solid: boolean[][];
   buildings: Building[];

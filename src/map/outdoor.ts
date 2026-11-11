@@ -107,6 +107,35 @@ export function buildOutdoor(): MapData {
     }
   }
 
+  // 연못과 정자: 수덕전 위쪽 빈터. 물(4)은 통과할 수 없고, 남쪽 기슭에서 정자까지 나무다리(5)가 놓여 있다.
+  const POND = { cx: 20, cy: 10, rx: 8.5, ry: 5.5 };
+  const OX = -21; // 정자·다리 위치 보정 (처음 설계 기준 칸에서 옮긴 만큼)
+  const OY = -26;
+  const inPond = (x: number, y: number) =>
+    ((x + 0.5 - POND.cx) / POND.rx) ** 2 + ((y + 0.5 - POND.cy) / POND.ry) ** 2 <= 1;
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (ground[y][x] === 0 && !solid[y][x] && inPond(x, y)) {
+        ground[y][x] = 4;
+        solid[y][x] = true;
+      }
+    }
+  }
+  // 정자 앞 마루(y 35)와 기슭까지 이어지는 다리(x 41~42, y 36~42)
+  for (let x = 39 + OX; x <= 44 + OX; x++) {
+    ground[35 + OY][x] = 5;
+    solid[35 + OY][x] = false;
+  }
+  for (let y = 36 + OY; y <= 42 + OY; y++) {
+    for (const x of [41 + OX, 42 + OX]) {
+      ground[y][x] = 5;
+      solid[y][x] = false;
+    }
+  }
+  // 정자 본체(가로 4칸 × 세로 2칸)는 통과할 수 없다
+  for (let y = 33 + OY; y <= 34 + OY; y++) for (let x = 40 + OX; x <= 43 + OX; x++) solid[y][x] = true;
+  const nearPond = (tx: number, ty: number) => tx >= 10 && tx <= 30 && ty >= 3 && ty <= 17;
+
   /** 목표 칸 주변에서, 길 중심선으로부터 [minD, maxD] 떨어진 빈 잔디 칸 중 가장 가까운 곳 */
   const findSpot = (tx: number, ty: number, minD: number, maxD: number): [number, number] => {
     let best: [number, number] = [tx, ty];
@@ -166,9 +195,13 @@ export function buildOutdoor(): MapData {
       w: 2,
       h: 1,
       approach: { tx: 7, ty: 35 },
-      // 피자 배달부 이벤트를 먼저 본 뒤에 들어갈 수 있다
-      requires: 'pizza_done',
-      lockedText: '건물 앞에서 피자 배달부가 두리번거리고 있다.\n들어가기 전에 무슨 일인지 먼저 물어볼까?',
+      // 본관 앞 신입생의 강아지 이벤트와 피자 배달부 이벤트를 모두 본 뒤에 들어갈 수 있다
+      requires: ['puppy_reported', 'pizza_done'],
+      lockedText: '산학협력관 문은 아직 들어갈 때가 아닌 것 같다.',
+      lockedHints: {
+        puppy_reported: '비탈길 위, 본관 앞의 신입생이 곤란한 일이 있는 것 같았는데…\n그 학생의 이야기부터 들어 줄까?',
+        pizza_done: '건물 앞에서는 피자 배달부가 두리번거리고 있다.\n무슨 일인지 먼저 물어볼까?',
+      },
       action: { type: 'door', toMap: 'hall', toSpawn: 'from_outdoor', set: { entered_building: true } },
     },
     {
@@ -196,6 +229,29 @@ export function buildOutdoor(): MapData {
       hideIf: 'puppy_found',
       beacon: true,
       action: { type: 'dialogue', script: 'bush_sound', cutscene: 'puppy_reveal' },
+    },
+    // 연못 위 정자: 다리 끝 마루에서 말을 건다
+    {
+      id: 'jeongja',
+      kind: 'object',
+      tx: 40 + OX,
+      ty: 34 + OY,
+      w: 4,
+      h: 3,
+      texture: 'jeongja',
+      approach: { tx: 41 + OX, ty: 35 + OY },
+      action: { type: 'dialogue', script: 'jeongja' },
+    },
+    // 연꽃이 떠 있는 물가 (눈에 보이지 않는 영역)
+    {
+      id: 'lotus_pond',
+      kind: 'object',
+      tx: 34 + OX,
+      ty: 38 + OY,
+      w: 4,
+      h: 3,
+      approach: { tx: 41 + OX, ty: 38 + OY },
+      action: { type: 'dialogue', script: 'lotus_pond' },
     },
     // 추억 클릭 포인트 (문구는 임시. dialogues.ts 에서 수정)
     { id: 'mem_sign', kind: 'object', tx: signX, ty: signY, texture: 'sign', action: { type: 'dialogue', script: 'mem_sign' } },
@@ -300,7 +356,7 @@ export function buildOutdoor(): MapData {
   while (placed < 70 && guard++ < 4000) {
     const tx = 2 + Math.floor(rand() * (MAP_W - 4));
     const ty = 2 + Math.floor(rand() * (MAP_H - 4));
-    if (solid[ty][tx] || reserved.has(`${tx},${ty}`) || distToPath(tx + 0.5, ty + 0.5) < PATH_RADIUS + 1.8 || nearBuilding(tx, ty, 2)) continue;
+    if (solid[ty][tx] || nearPond(tx, ty) || reserved.has(`${tx},${ty}`) || distToPath(tx + 0.5, ty + 0.5) < PATH_RADIUS + 1.8 || nearBuilding(tx, ty, 2)) continue;
     solid[ty][tx] = true;
     trees.push({ tx, ty, kind: kindAt() });
     placed++;
@@ -360,6 +416,19 @@ export function buildOutdoor(): MapData {
     if (best) addProp(best[0], best[1], 'lamp');
   }
 
+  // 연못 위에 떠 있는 연꽃과 연잎 (정자·다리·기슭에서 떨어진 물 칸에만)
+  const decor: NonNullable<MapData['decor']> = [];
+  const lotusKinds = ['lotus_leaf', 'lotus_pink', 'lotus_leaf', 'lotus_white', 'lotus_bud', 'lotus_pink'];
+  const lotusRand = rng(777);
+  const isWater = (x: number, y: number) => ground[y]?.[x] === 4;
+  for (let y = 31 + OY; y <= 42 + OY; y++) {
+    for (let x = 32 + OX; x <= 50 + OX; x++) {
+      if (!isWater(x, y) || ![-1, 0, 1].every((d) => isWater(x + d, y)) || !isWater(x, y - 1) || !isWater(x, y + 1)) continue;
+      if (x >= 39 + OX && x <= 44 + OX && y >= 32 + OY && y <= 36 + OY) continue; // 정자 주변
+      if (lotusRand() < 0.3) decor.push({ tx: x, ty: y, texture: lotusKinds[Math.floor(lotusRand() * lotusKinds.length)], depth: 2 });
+    }
+  }
+
   return {
     id: 'outdoor',
     theme: 'outdoor',
@@ -373,6 +442,7 @@ export function buildOutdoor(): MapData {
     props,
     interactables,
     zones,
+    decor,
     // 본관 앞 2026년(현재) → 비탈길을 내려가며 과거로 → 산학협력관 앞 2006년. 올라가면 다시 현재로.
     timeline: { kind: 'path', line: PATH, from: 2026, to: 2006 },
     links: { hall: { tx: 7, ty: 34 }, office: { tx: 7, ty: 34 }, room701: { tx: 7, ty: 34 }, room703: { tx: 7, ty: 34 }, garden: { tx: 54, ty: 28 } },

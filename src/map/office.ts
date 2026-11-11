@@ -90,6 +90,23 @@ export function buildOffice(): MapData {
       approach: { tx: 10, ty: 8 },
       action: { type: 'dialogue', script: 'red_pen' },
     },
+    // 과제를 끝까지 읽으면 책상 위에 편지 한 통이 나타난다 (제자의 마음)
+    {
+      id: 'letter',
+      kind: 'object',
+      tx: 9,
+      ty: 7,
+      w: 1,
+      h: 1,
+      texture: 'letter_envelope',
+      dy: -8,
+      z: 20,
+      float: true,
+      beacon: true,
+      showIf: 'papers_read',
+      approach: { tx: 9, ty: 8 },
+      action: { type: 'card', card: 'letter_hyeonseo', set: { letter_read: true } },
+    },
   ];
 
   // 책상(8~10칸, 6~7줄)과 의자(9,5)는 통과할 수 없다

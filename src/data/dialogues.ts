@@ -87,6 +87,16 @@ export const SCRIPTS: Record<string, Script> = {
       text: '자판기가 윙— 하고 돌아가고 있다.\n수업 사이사이 목을 축이던 그 자판기일지도.\n우유가 맛있었다는 소문이...',
     },
   },
+  jeongja: {
+    start: {
+      text: '연못 위에 붉은 정자가 떠 있다.\n난간에 기대어 쉬고 있으면 물 위로 시간이 천천히 흐르는 것 같다.',
+    },
+  },
+  lotus_pond: {
+    start: {
+      text: '연잎 사이로 연꽃이 둥실둥실 떠 있다.\n진흙 속에서도 곱게 피어나는 꽃이라고 한다.',
+    },
+  },
   mem_bench: {
     start: {
       text: '벤치에 앉으면 그 시절이 떠오른다.\n날씨가 좋을때 야외 수업이 기억에 남는다.',
@@ -136,7 +146,7 @@ export const SCRIPTS: Record<string, Script> = {
       text: '[디지털콘텐츠학과 게시판]\n초록 게시판 가득 공지문과 종이가 붙어 있다. 한쪽에는 DICON 화살표가 그려져 있다.',
       next: 'memo',
     },
-    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 한 장이 붙어 있다.' },
+    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 세 장이 붙어 있다.' },
   },
   // ── 이상한 소리 퀘스트 (겁먹은 신입생 + 강아지) ──
   scared_intro: {
@@ -405,6 +415,10 @@ export const SCRIPTS: Record<string, Script> = {
   papers_done: {
     start: {
       text: '마지막 장 끝에 적힌 한 줄이 마음에 오래 남는다.\n…비탈길 오른쪽 숲속, 장미 덩굴 대문 뒤라고 했지.',
+      next: 'letter',
+    },
+    letter: {
+      text: '그런데 과제 더미 옆에, 아까는 없던 편지 한 통이 놓여 있다.\n봉투에는 "교수님께"라고 적혀 있다.',
     },
   },
 

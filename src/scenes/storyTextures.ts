@@ -348,6 +348,21 @@ export function makeStoryTextures(scene: Phaser.Scene) {
     tex.refresh();
   }
 
+  // 책상 위 편지 봉투 (16x11): 과제를 다 읽으면 나타난다
+  {
+    const { tex, ctx, r } = make('letter_envelope', 16, 11);
+    r(0, 0, 16, 11, '#fbf3e0');
+    r(0, 0, 16, 1, '#ffffff');
+    for (let i = 0; i < 7; i++) {
+      r(1 + i, 1 + i, 1, 1, '#d9c9a3');
+      r(14 - i, 1 + i, 1, 1, '#d9c9a3');
+    }
+    r(6, 4, 4, 4, '#d02b2b');
+    r(6, 4, 2, 2, '#ef5a5a');
+    outline(ctx, 16, 11);
+    tex.refresh();
+  }
+
   // 바닥 깔개 (64x40)
   {
     const { tex, ctx, r } = make('rug', 64, 40);
@@ -465,6 +480,106 @@ export function makeStoryTextures(scene: Phaser.Scene) {
     outline(ctx, 36, 44);
     shadow(ctx, 18, 43, 16, 2.4);
     tex.refresh();
+  }
+
+  // ───────────────────────── 연못과 정자 (야외) ─────────────────────────
+
+  // 물 위 정자 (64x64): 붉은 기둥 + 기와지붕 + 주황 난간. 아랫줄(y=64)이 발 아래 칸 줄에 놓인다
+  {
+    const { tex, ctx, r } = make('jeongja', 64, 64);
+    // 물속 돌기둥(주춧돌)
+    for (const x of [4, 22, 38, 56]) {
+      r(x, 58, 5, 6, '#a9aeb6');
+      r(x, 58, 5, 1, '#d2d6dc');
+      r(x + 4, 58, 1, 6, '#80858e');
+    }
+    // 마루(주황)와 처마 밑 그림자
+    r(0, 50, 64, 9, '#e8903a');
+    r(0, 50, 64, 2, '#f6b565');
+    r(0, 57, 64, 2, '#b5452f');
+    // 안쪽 어둠(천장 아래)
+    r(4, 28, 56, 20, '#4a332c');
+    r(4, 28, 56, 3, '#6e2e28');
+    r(10, 34, 44, 12, '#5b4338');
+    // 난간: 위 가로대 + 아래 가로대 + 격자 살
+    r(0, 41, 64, 3, '#e8903a');
+    r(0, 41, 64, 1, '#f6b565');
+    r(0, 48, 64, 3, '#e8903a');
+    for (let x = 3; x < 62; x += 5) r(x, 44, 2, 4, '#c8472f');
+    // 빨간 기둥 4개
+    for (const x of [3, 21, 37, 55]) {
+      r(x, 26, 6, 25, '#c8382f');
+      r(x, 26, 2, 25, '#e0584a');
+      r(x + 5, 26, 1, 25, '#8f2a24');
+    }
+    // 창방(기둥 위 가로 들보) + 금빛 장식
+    r(0, 22, 64, 5, '#b02a2a');
+    r(0, 22, 64, 1, '#d9524a');
+    for (let x = 4; x < 62; x += 7) r(x, 24, 3, 2, '#e8c15a');
+    // 현판
+    r(25, 27, 14, 4, '#3b2a1f');
+    r(27, 28, 10, 2, '#e8c15a');
+    // 기와지붕: 아래로 갈수록 넓은 사다리꼴 + 처마 끝이 살짝 들린 모양
+    for (let y = 6; y < 23; y++) {
+      const t = (y - 6) / 16;
+      const half = Math.round(15 + t * 17); // 위 15 → 아래 32
+      r(32 - half, y, half * 2, 1, y % 4 === 0 ? '#5d6b7d' : '#46525f');
+    }
+    // 기와 골
+    for (let y = 8; y < 22; y += 4) {
+      const t = (y - 6) / 16;
+      const half = Math.round(15 + t * 17);
+      for (let x = 32 - half + 2; x < 32 + half - 2; x += 5) r(x, y, 1, 3, '#33404c');
+    }
+    // 처마 끝 선(밝은 띠)과 들린 추녀 끝
+    r(0, 20, 64, 2, '#2e3944');
+    r(0, 19, 64, 1, '#7a8899');
+    r(0, 18, 4, 2, '#46525f');
+    r(60, 18, 4, 2, '#46525f');
+    // 지붕 꼭대기 용마루 + 절병통(보주)
+    r(24, 5, 16, 2, '#2e3944');
+    r(29, 3, 6, 3, '#aeb4bc');
+    r(30, 0, 4, 4, '#c9ced5');
+    r(31, 0, 2, 1, '#e6e9ed');
+    outline(ctx, 64, 64);
+    shadow(ctx, 32, 62, 31, 2);
+    tex.refresh();
+  }
+
+  // 연잎·연꽃 (16x16): 물 위에 떠 있는 장식
+  {
+    const leaf = (key: string, flower: 'pink' | 'white' | 'bud' | null) => {
+      const { tex, ctx, r } = make(key, 16, 16);
+      disc(ctx, 8, 9, 6, '#2f7d4a');
+      disc(ctx, 8, 9, 5, '#47a860');
+      // 잎 한쪽 갈라진 틈
+      r(8, 9, 8, 1, '#4399bd');
+      // 잎맥
+      r(5, 8, 1, 1, '#2f7d4a');
+      r(10, 11, 1, 1, '#2f7d4a');
+      r(7, 12, 1, 1, '#2f7d4a');
+      r(4, 7, 2, 1, '#7fd18c');
+      if (flower === 'pink' || flower === 'white') {
+        const base = flower === 'pink' ? '#ff8fb5' : '#fffaf0';
+        const light = flower === 'pink' ? '#ffc4d8' : '#ffffff';
+        const dark = flower === 'pink' ? '#e0608f' : '#d9d2c4';
+        r(4, 6, 8, 5, base);
+        r(5, 4, 2, 3, base);
+        r(9, 4, 2, 3, base);
+        r(7, 2, 2, 5, light);
+        r(4, 9, 8, 2, dark);
+        r(7, 7, 2, 2, '#ffe066');
+      } else if (flower === 'bud') {
+        r(7, 3, 2, 6, '#ff8fb5');
+        r(7, 3, 2, 2, '#ffc4d8');
+        r(6, 6, 4, 3, '#e0608f');
+      }
+      tex.refresh();
+    };
+    leaf('lotus_leaf', null);
+    leaf('lotus_pink', 'pink');
+    leaf('lotus_white', 'white');
+    leaf('lotus_bud', 'bud');
   }
 
   // ───────────────────────── 701호 댄스 동아리 연습실 (UCDC) ─────────────────────────

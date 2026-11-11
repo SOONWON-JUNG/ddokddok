@@ -35,10 +35,22 @@ export function renderMap(scene: Phaser.Scene, map: MapData) {
   // 장식(포스터, 창문, 깔개): 칸 왼쪽 아래 기준
   for (const d of map.decor ?? []) {
     const y = (d.ty + 1) * TILE;
-    scene.add
+    const img = scene.add
       .image(d.tx * TILE, y, d.texture)
       .setOrigin(0, 1)
       .setDepth(d.depth ?? y);
+    // 연꽃은 물결에 맞춰 살짝 둥실거린다 (위치마다 박자가 달라 한꺼번에 움직이지 않는다)
+    if (d.texture.startsWith('lotus_')) {
+      scene.tweens.add({
+        targets: img,
+        y: y - 1.5,
+        duration: 1400 + ((d.tx * 7 + d.ty * 13) % 9) * 130,
+        delay: ((d.tx * 31 + d.ty * 17) % 10) * 160,
+        ease: 'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1,
+      });
+    }
   }
 }
 
@@ -96,6 +108,52 @@ function drawOutdoorGround(scene: Phaser.Scene, map: MapData) {
           ctx.fillStyle = '#4a4655';
           if (ground[y]?.[x - 1] !== 3) ctx.fillRect(px, py, 1, TILE);
           if (ground[y]?.[x + 1] !== 3) ctx.fillRect(px + TILE - 1, py, 1, TILE);
+        } else if (g === 4) {
+          // 연못 물: 두 톤의 물빛 + 잔물결 + 기슭 쪽 밝은 물거품 / 북쪽 기슭은 바위
+          ctx.fillStyle = (x + y) % 2 === 0 ? '#4a9fbd' : '#4396b5';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#6bbdd4';
+          for (let i = 0; i < 2; i++) ctx.fillRect(px + 1 + Math.floor(rand() * 10), py + 2 + Math.floor(rand() * 11), 4, 1);
+          ctx.fillStyle = '#8fd6e6';
+          ctx.fillRect(px + 2 + Math.floor(rand() * 10), py + 3 + Math.floor(rand() * 10), 2, 1);
+          const shore = (dx: number, dy: number) => {
+            const v = ground[y + dy]?.[x + dx];
+            return v !== undefined && v !== 4 && v !== 5;
+          };
+          ctx.fillStyle = '#bfe8ef';
+          if (shore(0, 1)) ctx.fillRect(px, py + TILE - 2, TILE, 2);
+          if (shore(-1, 0)) ctx.fillRect(px, py, 2, TILE);
+          if (shore(1, 0)) ctx.fillRect(px + TILE - 2, py, 2, TILE);
+          if (shore(0, -1)) {
+            // 북쪽 기슭: 바위 절벽
+            ctx.fillStyle = '#9d978f';
+            ctx.fillRect(px, py, TILE, 6);
+            ctx.fillStyle = '#c4beb4';
+            ctx.fillRect(px + 1, py, 5, 3);
+            ctx.fillRect(px + 9, py + 1, 5, 2);
+            ctx.fillStyle = '#6f6a64';
+            ctx.fillRect(px, py + 6, TILE, 1);
+            ctx.fillRect(px + 7, py + 1, 1, 4);
+          }
+        } else if (g === 5) {
+          // 정자 나무다리: 주황빛 널판 + 양옆 붉은 난간(물과 맞닿은 쪽)
+          ctx.fillStyle = (x + y) % 2 === 0 ? '#e8a050' : '#e09848';
+          ctx.fillRect(px, py, TILE, TILE);
+          ctx.fillStyle = '#c47a34';
+          for (let i = 0; i < TILE; i += 4) ctx.fillRect(px, py + i + 3, TILE, 1);
+          ctx.fillStyle = '#f6c27f';
+          ctx.fillRect(px, py, TILE, 1);
+          const wet = (dx: number, dy: number) => ground[y + dy]?.[x + dx] === 4;
+          ctx.fillStyle = '#c8472f';
+          if (wet(-1, 0)) ctx.fillRect(px, py, 3, TILE);
+          if (wet(1, 0)) ctx.fillRect(px + TILE - 3, py, 3, TILE);
+          ctx.fillStyle = '#e8745a';
+          if (wet(-1, 0)) ctx.fillRect(px, py, 1, TILE);
+          if (wet(1, 0)) ctx.fillRect(px + TILE - 3, py, 1, TILE);
+          if (wet(0, 1)) {
+            ctx.fillStyle = '#8f5a2a';
+            ctx.fillRect(px, py + TILE - 2, TILE, 2);
+          }
         } else if (g === 0) {
           // 잔디: 체커 느낌의 은은한 두 톤 + 풀잎
           ctx.fillStyle = (x + y) % 2 === 0 ? grass[0] : grass[1];

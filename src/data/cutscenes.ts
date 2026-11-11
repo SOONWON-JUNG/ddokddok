@@ -116,7 +116,11 @@ export const CUTSCENES: Record<string, CutStep[]> = {
   ],
 
   // 학과 게시판: 대사 뒤에 종이 쪽지 그림을 보여준다 (다시 눌러도 볼 수 있다)
-  board_note: [{ type: 'card', card: 'board_note' }],
+  board_note: [
+    { type: 'card', card: 'board_note' },
+    { type: 'card', card: 'board_note_changhyun' },
+    { type: 'card', card: 'board_note_chick' },
+  ],
 
   // 이상한 소리 퀘스트: 수풀에서 강아지가 튀어나와 그때부터 교수님을 따라다닌다
   puppy_reveal: [
