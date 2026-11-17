@@ -147,7 +147,7 @@ export const SCRIPTS: Record<string, Script> = {
       text: '[디지털콘텐츠학과 게시판]\n초록 게시판 가득 공지문과 종이가 붙어 있다. 한쪽에는 DICON 화살표가 그려져 있다.',
       next: 'memo',
     },
-    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 일곱 장이 붙어 있다.' },
+    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 아홉 장이 붙어 있다.' },
   },
   // ── 이상한 소리 퀘스트 (겁먹은 신입생 + 강아지) ──
   scared_intro: {

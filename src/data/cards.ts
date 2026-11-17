@@ -60,6 +60,16 @@ export const CARDS: Record<string, CardOptions> = {
     hideMedia: true,
     text: '전경란 교수님~\n우리 교수님이 총장님이 되셨다니!!\n너무너무 축하드립니다!!\n\n대학 시절 늘 따뜻하게 대해주시던\n교수님 모습이 아직도 생생한데,\n이렇게 멋진 소식을 들으니\n정말 반갑고 기분이 좋아요.\n\n앞으로도 교수님의 따뜻함과 멋진 리더십으로\n학교를 잘 이끌어주시리라 믿어요!\n항상 건강하시고 행복한 일들만 가득하시길 바랄게요.\n언제나 교수님을 응원할게요!\n\n교수님, 다시 한번 정말 축하드려요! ❤️\n\n- 06 수언 -',
   },
+  board_note_byeonggon: {
+    note: true,
+    hideMedia: true,
+    text: '교수님, 총장 취임 축하드립니다!\n교수님의 발자취를 보며\n저 또한 더 배우고 본받으며\n성장하고 싶다는 다짐을 하게 됩니다.\n다시 한번 진심으로 축하드립니다!\n\n- 06 병곤 -',
+  },
+  board_note_juhee: {
+    note: true,
+    hideMedia: true,
+    text: '교수님, 먼저 총장 취임을 진심으로 축하드립니다!\n20년 전 스무 살이었던 주희예요 ☺️\n잘 지내고 계시죠?\n\n교수님께서 총장님이 되셨다는 소식을\n전해 듣고 정말 기뻤어요!\n꼭 한번 찾아뵙고 인사드리겠습니다.\n\n늘 건강하시고,\n앞으로도 좋은 일 가득하시길 바랍니다 ♥\n\n- 06 주희 -',
+  },
   board_note_chick: {
     note: true,
     hideMedia: true,
@@ -116,10 +126,9 @@ export const CARDS: Record<string, CardOptions> = {
     placeholder: 'public/images/wedding.jpg 에 결혼식 사진을 넣어 주세요',
   },
   gift: {
-    src: 'images/gift.png',
-    kind: 'gift',
+    kind: 'scarf',
     caption: '보물상자 속 선물',
     text: '상자 안에서 따뜻한 빛과 함께 선물이 나타났다!',
-    placeholder: 'public/images/gift.png 에 실제 선물 사진을 넣어 주세요',
   },
+
 };

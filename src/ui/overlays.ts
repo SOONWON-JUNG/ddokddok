@@ -24,7 +24,7 @@ export interface CardOptions {
   caption?: string;
   text?: string;
   /** 이미지가 없을 때 대신 그릴 그림 */
-  kind?: 'book' | 'gift' | 'wedding';
+  kind?: 'book' | 'gift' | 'wedding' | 'scarf';
   /** 이미지가 없을 때 아래에 작게 보여주는 안내 */
   placeholder?: string;
   /** 글자만 보여주는 카드 (이미지/그림 영역을 숨김) */
@@ -49,7 +49,60 @@ function placeholderArt(kind: CardOptions['kind']) {
     g.fillRect(x, y, w, h);
   };
   r(0, 0, 48, 36, '#fffaf0');
-  if (kind === 'gift') {
+  if (kind === 'scarf') {
+    c.height = 56;
+    r(0, 0, 48, 56, '#f3ead8');
+    // 따뜻한 빛 (상자에서 나오는 느낌): 바깥으로 갈수록 옅어지는 동심 사각형
+    r(4, 4, 40, 48, '#f8f1e1');
+    r(9, 8, 30, 40, '#fdf8ea');
+    const navy = '#1f3a5a';
+    const navyDk = '#14283f';
+    const hi = '#8fb4c8';
+    const orange = '#d98a4a';
+    const cream = '#efe3cc';
+    const blue = '#4f6fae';
+    // 비스듬히 내려가는 띠 한 줄을 그린다. 끝은 뾰족하게 좁아지는 리본 모양
+    const band = (x0: number, y0: number, x1: number, y1: number, w: number, seed: number) => {
+      const n = y1 - y0;
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const cx = x0 + (x1 - x0) * t + Math.sin(t * Math.PI * 2) * (seed % 2 ? 3 : -3); // 살짝 휘어진다
+        const left = n - i; // 끝까지 남은 줄 수
+        const hw = (left < 5 ? Math.max(1, w * (0.25 + left / 7)) : w) / 2;
+        const xs = Math.round(cx - hw);
+        const xe = Math.max(xs + 1, Math.round(cx + hw));
+        const y = y0 + i;
+        r(xs - 1, y, xe - xs + 2, 1, '#0d1c2e'); // 윤곽
+        r(xs, y, xe - xs, 1, navy);
+        r(xs, y, 1, 1, navyDk);
+        for (let x = xs + 1; x < xe; x++) {
+          const k = (x * 5 + y * 3 + seed) % 7;
+          if (k === 0) r(x, y, 1, 1, hi);
+          else if (k === 2 && y % 2 === 0) r(x, y, 1, 1, orange);
+          else if (k === 4 && y % 3 === 0) r(x, y, 1, 1, cream);
+          else if (k === 5 && y % 2 === 1) r(x, y, 1, 1, blue);
+        }
+        // 끝 가까이에는 흰색 줄무늬 띠
+        if (left > 6 && left < 11 && left % 2 === 0) r(xs, y, xe - xs, 1, cream);
+      }
+    };
+    band(25, 12, 31, 47, 6, 1);
+    band(23, 12, 17, 51, 6, 2);
+    // 위쪽 매듭: 접어 묶은 작은 띠 (비스듬히 접힌 느낌)
+    r(21, 6, 8, 1, '#0d1c2e');
+    r(20, 7, 10, 6, '#0d1c2e');
+    r(21, 7, 8, 1, hi);
+    r(21, 8, 8, 4, navy);
+    r(22, 8, 2, 2, orange);
+    r(26, 9, 2, 2, cream);
+    r(24, 10, 1, 1, hi);
+    r(21, 11, 8, 1, navyDk);
+    // 반짝임
+    for (const [x, y] of [[6, 10], [41, 14], [8, 40], [40, 36], [24, 3]] as const) {
+      r(x, y - 1, 1, 3, '#fff6d8');
+      r(x - 1, y, 3, 1, '#fff6d8');
+    }
+  } else if (kind === 'gift') {
     r(14, 14, 20, 16, '#e0708f');
     r(14, 14, 20, 4, '#f08aa8');
     r(22, 14, 4, 16, '#ffd25e');
