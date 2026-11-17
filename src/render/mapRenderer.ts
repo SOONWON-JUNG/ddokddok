@@ -472,19 +472,19 @@ function paintBuilding(scene: Phaser.Scene, key: string, b: Building) {
     const bx = 10;
     const bw = w - 20;
     const by = 54;
-    const bh = 8 + b.banner.length * 10;
+    const bh = 12 + b.banner.length * 10;
     rect(bx + 3, by - 4, 2, 5, '#6a4630');
     rect(bx + bw - 5, by - 4, 2, 5, '#6a4630');
-    rect(bx, by, bw, bh, '#d94b3a');
-    rect(bx, by, bw, 2, '#ef6a58');
-    rect(bx, by + bh - 2, bw, 2, '#a9372b');
+    rect(bx, by, bw, bh, '#2f6fd0');
+    rect(bx, by, bw, 2, '#5b93e8');
+    rect(bx, by + bh - 2, bw, 2, '#1f4b9a');
     rect(bx + 3, by + 3, bw - 6, 1, 'rgba(255,246,216,0.55)');
     rect(bx + 3, by + bh - 4, bw - 6, 1, 'rgba(255,246,216,0.55)');
     rect(bx, by + bh, bw, 2, 'rgba(0,0,0,0.22)');
-    ctx.font = 'bold 9px sans-serif';
+    ctx.font = 'bold 8px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#fff6d8';
-    b.banner.forEach((line, i) => ctx.fillText(line, w / 2, by + 15 + i * 10));
+    b.banner.forEach((line, i) => ctx.fillText(line, w / 2, by + 14 + i * 10));
   }
 
   // 출입문 + 계단

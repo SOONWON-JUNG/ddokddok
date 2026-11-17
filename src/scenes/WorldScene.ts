@@ -201,11 +201,13 @@ export class WorldScene extends Phaser.Scene {
     });
     this.time.addEvent({ delay: 4000, loop: true, callback: () => this.persist() });
     this.persist();
+    dialogue.onFx = (name) => this.dialogueFx(name);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       window.removeEventListener('keydown', this.onKey);
       window.removeEventListener('pointerdown', touch);
       window.removeEventListener('keydown', touch);
       document.getElementById('goal-hint')?.classList.remove('nudge');
+      dialogue.onFx = null;
       this.clearNameTags();
       this.seasons?.destroy();
       this.seasons = null;
@@ -535,6 +537,37 @@ export class WorldScene extends Phaser.Scene {
       audio.sfx('door');
       this.changeMap(a.toMap, a.toSpawn);
     }
+  }
+
+  /** 대화 노드의 fx 처리 */
+  private dialogueFx(name: string) {
+    if (name === 'feather') this.dropFeather();
+  }
+
+  /** 703호: 쓰러진 병아리 현서에게서 노란 깃털 한 가닥이 팔랑팔랑 흔들리며 바닥으로 떨어진다 */
+  private dropFeather() {
+    const hs = this.entries.find((e) => e.it.id === 'npc_hs_fallen');
+    const x0 = hs ? hs.rect.centerX : 3 * TILE + 8;
+    const floorY = (hs ? hs.rect.bottom : 11 * TILE) + 2;
+    const f = this.add.image(x0, floorY - 46, 'feather_yellow').setDepth(9600).setOrigin(0.5, 0.5).setScale(1.4);
+    const sway = 9;
+    // 좌우로 흔들리며(사인 곡선) 천천히 내려오고, 흔들릴 때마다 기울어진다
+    this.tweens.add({
+      targets: f,
+      y: floorY,
+      duration: 2600,
+      ease: 'Sine.easeIn',
+      onUpdate: (tw) => {
+        const p = Number(tw.progress);
+        f.x = x0 + 4 + Math.sin(p * Math.PI * 4) * sway * (1 - p * 0.6);
+        f.setAngle(Math.cos(p * Math.PI * 4) * 55);
+      },
+      onComplete: () => {
+        f.setAngle(80).setDepth(floorY);
+        // 바닥에 내려앉은 깃털은 잠시 머물다 사라진다
+        this.tweens.add({ targets: f, alpha: 0, delay: 4500, duration: 900, onComplete: () => f.destroy() });
+      },
+    });
   }
 
   /** 책장 메뉴: 닫기를 고를 때까지 몇 번이든 다시 볼 수 있다 */
@@ -1110,8 +1143,8 @@ export class WorldScene extends Phaser.Scene {
     // 반짝! 사람으로 변한다
     await this.puppyAct({ type: 'puppy', act: 'transform' });
     await this.delay(600);
-    // 정면을 보고 서서, 관객(교수님)께 꾸벅 인사한다
-    await this.bow('man_dev', 2);
+    // 정면을 보고 서서, 양팔을 비행기처럼 활짝 펴고 좌우로 기울이며 인사한다
+    await this.airplaneWave('man_dev', 6);
     await this.delay(250);
     this.emote('man_dev', 'heart');
     audio.sfx('fanfare');
@@ -1120,25 +1153,50 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * 꾸벅 인사: 정면을 본 채 몸을 앞으로 숙이는 느낌으로 위아래로 눌렀다 천천히 일어선다.
-   * (스프라이트가 정면 한 장뿐이라 눌림 + 살짝 내려앉기로 표현. 마지막은 폴짝 뛰며 환하게)
+   * 비행기 인사: 양팔을 옆으로 쭉 펴고 날개처럼 번갈아 기울이며 흔든다.
+   * (스프라이트에는 팔 동작이 없어서 소매 색 팔을 따로 그려 어깨를 축으로 돌린다)
    */
-  private async bow(id: string, times: number) {
+  private async airplaneWave(id: string, swings: number) {
     const a = this.actorOf(id);
     a.setFrame('down_0');
+    const sc = a.scaleX;
     const baseY = a.y;
-    for (let n = 0; n < times; n++) {
-      await new Promise<void>((resolve) =>
-        this.tweens.add({ targets: a, scaleY: 0.78, scaleX: 1.08, y: baseY + 2, angle: n % 2 === 0 ? -3 : 3, duration: 420, ease: 'Sine.easeInOut', onComplete: () => resolve() }),
-      );
-      await this.delay(260);
-      await new Promise<void>((resolve) =>
-        this.tweens.add({ targets: a, scaleY: 1, scaleX: 1, y: baseY, angle: 0, duration: 380, ease: 'Sine.easeOut', onComplete: () => resolve() }),
-      );
-      audio.sfx('pop');
-      await this.delay(300);
+    const sx = 6 * sc;
+    const sy = baseY - 17 * sc;
+    const mk = (x: number, flip: number) => {
+      const c = this.add.container(x, sy).setDepth(a.depth + 1);
+      c.add(this.add.rectangle(0, 0, 4 * sc, 11 * sc, 0x5a6a8a).setOrigin(0.5, 0));
+      c.add(this.add.rectangle(0, 11 * sc, 4 * sc, 3 * sc, 0xf0c6a0).setOrigin(0.5, 0));
+      c.angle = flip * 90;
+      return c;
+    };
+    const L = mk(a.x - sx, 1);
+    const R = mk(a.x + sx, -1);
+    // 팔을 옆으로 펼친다
+    await new Promise<void>((resolve) => {
+      this.tweens.add({ targets: L, angle: 90, duration: 300, from: 0 });
+      this.tweens.add({ targets: R, angle: -90, duration: 300, from: 0, onComplete: () => resolve() });
+    });
+    L.angle = 90;
+    R.angle = -90;
+    // 날개처럼 번갈아 기울이기 (한쪽이 올라가면 다른 쪽은 내려간다)
+    for (let n = 0; n < swings; n++) {
+      const up = n % 2 === 0;
+      await new Promise<void>((resolve) => {
+        this.tweens.add({ targets: L, angle: up ? 125 : 55, duration: 260, ease: 'Sine.easeInOut' });
+        this.tweens.add({ targets: R, angle: up ? -55 : -125, duration: 260, ease: 'Sine.easeInOut' });
+        this.tweens.add({ targets: a, angle: up ? 5 : -5, duration: 260, ease: 'Sine.easeInOut', onComplete: () => resolve() });
+      });
+      if (n % 2 === 1) audio.sfx('pop');
     }
-    // 인사를 마치고 기쁘게 폴짝
+    a.angle = 0;
+    // 팔을 내리고 기쁘게 폴짝
+    await new Promise<void>((resolve) => {
+      this.tweens.add({ targets: L, angle: 0, duration: 260 });
+      this.tweens.add({ targets: R, angle: 0, duration: 260, onComplete: () => resolve() });
+    });
+    L.destroy();
+    R.destroy();
     for (let k = 0; k < 2; k++) {
       await new Promise<void>((resolve) =>
         this.tweens.add({ targets: a, y: baseY - 5, duration: 130, yoyo: true, onComplete: () => resolve() }),

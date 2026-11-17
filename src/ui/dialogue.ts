@@ -15,6 +15,8 @@ export interface DNode {
   text: string;
   /** 다음 노드. 없으면 대화 종료 */
   next?: string;
+  /** 이 노드를 보여줄 때 일으킬 화면 효과 이름 (WorldScene 이 받아서 처리. 예: 'feather') */
+  fx?: string;
   /** 이 노드를 보여줄 때 켜지는 플래그 */
   set?: Flags;
   /** 선택지 (1~2개 권장) */
@@ -82,6 +84,9 @@ class DialogueUI {
   }
 
   /** 스크립트를 처음부터 끝까지 진행한다. 대화가 끝나면 resolve */
+  /** 노드의 fx 를 처리하는 곳 (장면이 등록한다) */
+  onFx: ((name: string) => void) | null = null;
+
   async run(script: Script, start = 'start') {
     this.open();
     try {
@@ -91,6 +96,7 @@ class DialogueUI {
         const node: DNode | undefined = script[key];
         if (!node) break;
         gameState.setMany(node.set);
+        if (node.fx) this.onFx?.(node.fx);
         if (node.choices && node.choices.length) {
           const idx: number = await this.showChoices(node);
           const picked: DChoice = node.choices[idx];

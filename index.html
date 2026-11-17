@@ -331,6 +331,25 @@
         image-rendering: pixelated;
         text-align: center;
         overflow: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      /* 글이 길면 사진이 줄어들어 글이 잘리지 않게 한다 */
+      #card .card-media {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #card .card-media img {
+        min-height: 0;
+        object-fit: contain;
+      }
+      #card .card-caption,
+      #card .card-text,
+      #card .card-hint {
+        flex: none;
       }
       #card .card-media img,
       #card .card-media canvas {
@@ -590,6 +609,45 @@
         font-family: 'Nanum Pen Script', 'Gamja Flower', 'Segoe Print', 'Comic Sans MS', cursive;
         font-weight: 700;
       }
+      /* 띄어쓰기 교정 부호: 띄울 곳은 ∨, 붙일 곳은 ‿ (빨간 펜, 글자 사이에 그려 넣는다) */
+      #paper .mark-space {
+        position: relative;
+        display: inline-block;
+        width: 0.7em;
+        height: 1em;
+        vertical-align: baseline;
+      }
+      #paper .mark-space::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0.02em;
+        width: 0.5em;
+        height: 0.5em;
+        margin-left: -0.25em;
+        border-right: 2.5px solid #d02b2b;
+        border-bottom: 2.5px solid #d02b2b;
+        transform: rotate(45deg);
+      }
+      #paper .mark-join {
+        position: relative;
+        display: inline-block;
+        width: 0.6em;
+        height: 1em;
+        vertical-align: baseline;
+      }
+      #paper .mark-join::before {
+        content: '';
+        position: absolute;
+        left: -0.2em;
+        right: -0.2em;
+        top: 0.15em;
+        height: 0.55em;
+        border: 2px solid #d02b2b;
+        border-bottom: none;
+        border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+        transform: rotate(2deg);
+      }
       #paper .circle {
         display: inline-block;
         padding: 0 0.3em;
@@ -613,13 +671,40 @@
         background: rgba(255, 210, 94, 0.28);
         border-style: solid;
       }
+      /* 교수님 서명: 이름을 빨간 글씨로 쓰는 대신 붉은 인주 도장(낙관)으로 찍는다 */
       #paper .sign {
-        margin-top: 8px;
-        text-align: right;
-        color: #d02b2b;
-        font-family: 'Nanum Pen Script', 'Gamja Flower', 'Segoe Print', 'Comic Sans MS', cursive;
-        font-weight: 700;
-        font-size: 1.15em;
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 8px;
+      }
+      #paper .stamp {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        width: 3.1em;
+        height: 3.1em;
+        padding: 0.12em;
+        gap: 0;
+        color: #fbeee0;
+        background: #c2342b;
+        border: 2px solid #c2342b;
+        outline: 1.5px solid #c2342b;
+        outline-offset: 2px;
+        border-radius: 3px;
+        transform: rotate(-4deg);
+        opacity: 0.9;
+        font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif;
+        font-weight: 900;
+        font-size: 1em;
+        line-height: 1;
+        box-shadow: inset 0 0 0 1px rgba(255, 236, 220, 0.35);
+      }
+      #paper .stamp span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25em;
       }
       #paper .bar {
         width: min(94vw, 660px);

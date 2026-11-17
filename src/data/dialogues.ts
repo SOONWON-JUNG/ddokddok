@@ -87,6 +87,9 @@ export const SCRIPTS: Record<string, Script> = {
       text: '자판기가 윙— 하고 돌아가고 있다.\n수업 사이사이 목을 축이던 그 자판기일지도.\n우유가 맛있었다는 소문이...',
     },
   },
+  xbanner_50: {
+    start: { text: '[동의지천 50년, 미래 100년을 열다]\n동의대학교 1977-2027\n본관 앞에 개교 50주년 현수막이 세워져 있다.' },
+  },
   jeongja: {
     start: {
       text: '연못 위에 붉은 정자가 떠 있다.\n난간에 기대어 쉬고 있으면 물 위로 시간이 천천히 흐르는 것 같다.',
@@ -135,9 +138,7 @@ export const SCRIPTS: Record<string, Script> = {
   },
 
   main_door: {
-    start: {
-      text: '본관 문은 아직 열리지 않아요.\n',
-    },
+    start: { text: '왜인지 본관 문은 굳게 잠겨 있다.' },
   },
 
   // ── S5: 산학협력관 복도 (Scene 04) — 문구는 모두 임시 ──
@@ -146,7 +147,7 @@ export const SCRIPTS: Record<string, Script> = {
       text: '[디지털콘텐츠학과 게시판]\n초록 게시판 가득 공지문과 종이가 붙어 있다. 한쪽에는 DICON 화살표가 그려져 있다.',
       next: 'memo',
     },
-    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 네 장이 붙어 있다.' },
+    memo: { text: '시간표, 공모전 포스터… 그 사이에 쪽지 일곱 장이 붙어 있다.' },
   },
   // ── 이상한 소리 퀘스트 (겁먹은 신입생 + 강아지) ──
   scared_intro: {
@@ -383,12 +384,12 @@ export const SCRIPTS: Record<string, Script> = {
       text: '어, 교수님 안녕하세요! 저 진짜 살짝 닿기만 했어요. 진짜예요. 깃털 하나 안 건드렸어요.',
       next: 'b',
     },
-    b: { text: '저 멀리서 현서의 깃털 한 가닥이 팔랑팔랑 떨어진다.', next: 'c' },
+    b: { text: '저 멀리서 현서의 깃털 한 가닥이 팔랑팔랑 떨어진다.', fx: 'feather', next: 'c' },
     c: { speaker: '황소 선배', portrait: 'bull_senior', text: '…한 가닥은 건드렸네요.' },
   },
   door_702: {
     start: {
-      text: '702호. 전경란 교수님의 연구실.\n문패 아래 시간표는 화·수·목에 빼곡하다. 월요일과 금요일은 텅 비어 있다.',
+      text: '702호. 전경란 교수님의 연구실.\n문패 아래 시간표가 빼곡하다.',
       next: 'knock',
     },
     knock: { text: '…똑똑, 하고 문을 두드려 볼까?' },
@@ -407,8 +408,9 @@ export const SCRIPTS: Record<string, Script> = {
   },
   red_pen: {
     start: { text: '책상 위의 빨간 펜. 뚜껑에 닳은 자국이 있다.', next: 'b' },
-    b: {
-      text: '이 펜으로 수없이 많은 과제에 맞춤법과 띄어쓰기, 그리고 따뜻한 한마디를 남겨 주셨다.',
+    b: { text: '…이 펜으로 수없이 많은 과제에 맞춤법과 띄어쓰기,\n그리고 따뜻한 한마디를 남겨 주셨다.', next: 'c' },
+    c: {
+      text: '내 생각인데, 내 목소리가 아닌 것 같다.\n누군가의 마음이 잠깐 겹쳐 들린 것처럼.',
       set: { pen_seen: true },
     },
   },

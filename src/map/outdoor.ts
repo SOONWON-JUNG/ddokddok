@@ -76,7 +76,7 @@ export function buildOutdoor(): MapData {
       th: 8,
       theme: 'gray',
       label: '본관',
-      banner: ['전경란 교수님 총장 취임을 축하드립니다', '06학번 현서 · 창현 · 태진'],
+      banner: ['전경란 교수님 총장 취임을 축하드립니다', '06 현서 · 창현 · 태진'],
     },
   ];
   for (const b of buildings) {
@@ -230,6 +230,8 @@ export function buildOutdoor(): MapData {
       beacon: true,
       action: { type: 'dialogue', script: 'bush_sound', cutscene: 'puppy_reveal' },
     },
+    // 본관 입구 오른쪽의 X자 거치대 현수막 (동의지천 50년, 오른쪽에만)
+    { id: 'xbanner_r', kind: 'object', tx: 54, ty: 12, w: 3, h: 4, texture: 'xbanner_50', action: { type: 'dialogue', script: 'xbanner_50' } },
     // 연못 위 정자: 다리 끝 마루에서 말을 건다
     {
       id: 'jeongja',
@@ -307,6 +309,9 @@ export function buildOutdoor(): MapData {
     // NPC·안내판·자판기·파르페 표지판은 통과할 수 없다 (파르페 아이템과 벤치는 소품 칸 그대로)
     if (it.kind === 'npc' || it.texture === 'sign' || it.texture === 'vending' || it.texture === 'parfait_sign') {
       solid[it.ty][it.tx] = true;
+    }
+    if (it.texture === 'xbanner_50') {
+      for (let k = 0; k < 3; k++) solid[it.ty][it.tx + k] = true;
     }
     if (it.texture === 'garden_gate') {
       solid[it.ty][it.tx] = true;

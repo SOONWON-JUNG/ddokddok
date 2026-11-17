@@ -482,6 +482,67 @@ export function makeStoryTextures(scene: Phaser.Scene) {
     tex.refresh();
   }
 
+  // 동의지천 50년 X자 거치대 현수막 (48x72): 본관 입구 옆에 세워 둔다
+  {
+    const W = 48;
+    const { tex, ctx, r } = make('xbanner_50', W, 72);
+    // X자 다리 + 받침
+    ctx.strokeStyle = '#8d939c';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(9, 54);
+    ctx.lineTo(39, 70);
+    ctx.moveTo(39, 54);
+    ctx.lineTo(9, 70);
+    ctx.stroke();
+    r(5, 70, 38, 2, '#5d636d');
+    // 현수막 천: 흰 바탕 + 위아래 가는 고정대
+    r(3, 1, 42, 54, '#ffffff');
+    r(2, 0, 44, 2, '#8d939c');
+    r(2, 54, 44, 2, '#8d939c');
+    // "50": 파랑 → 금색 → 파랑 그라데이션
+    const g = ctx.createLinearGradient(6, 0, 42, 0);
+    g.addColorStop(0, '#2f6fd0');
+    g.addColorStop(0.45, '#2a5db0');
+    g.addColorStop(0.62, '#f0b232');
+    g.addColorStop(0.8, '#2a5db0');
+    g.addColorStop(1, '#2f6fd0');
+    ctx.fillStyle = g;
+    ctx.font = '900 30px "Arial Black", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('50', W / 2, 28);
+    // 문구: 칸 폭에 맞게 글자 크기를 줄여 가며 그린다
+    const line = (text: string, y: number, color: string, size: number) => {
+      let sz = size;
+      ctx.font = `bold ${sz}px sans-serif`;
+      while (ctx.measureText(text).width > 40 && sz > 3) {
+        sz -= 0.5;
+        ctx.font = `bold ${sz}px sans-serif`;
+      }
+      ctx.fillStyle = color;
+      ctx.fillText(text, W / 2, y);
+    };
+    line('동의지천 50년', 37, '#e0a22a', 7);
+    line('미래 100년을 열다', 45, '#1f3f7a', 7);
+    line('동의대학교 1977-2027', 51, '#2f5aa0', 5);
+    outline(ctx, W, 72);
+    shadow(ctx, W / 2, 71, 20, 2);
+    tex.refresh();
+  }
+
+  // 노란 깃털 한 가닥 (8x14): 병아리 현서에게서 떨어진다
+  {
+    const { tex, r } = make('feather_yellow', 8, 14);
+    r(3, 0, 2, 2, '#ffe9a0');
+    r(2, 2, 4, 3, '#ffd84a');
+    r(1, 5, 6, 3, '#ffd84a');
+    r(2, 8, 4, 2, '#f0b232');
+    r(3, 10, 2, 2, '#e0a22a');
+    r(3, 12, 1, 2, '#c58a22'); // 깃대
+    r(3, 3, 1, 6, '#fff3c4'); // 하이라이트 줄
+    tex.refresh();
+  }
+
   // ───────────────────────── 연못과 정자 (야외) ─────────────────────────
 
   // 물 위 정자 (64x64): 붉은 기둥 + 기와지붕 + 주황 난간. 아랫줄(y=64)이 발 아래 칸 줄에 놓인다

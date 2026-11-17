@@ -230,7 +230,7 @@ export const comicViewer = new ComicViewer();
 
 export interface PaperPage {
   title?: string;
-  /** 문단. `{틀린말>고친말}` 은 빨간 펜 교정, `((말))` 은 빨간 동그라미 */
+  /** 문단. `{틀린말>고친말}` 은 빨간 펜 교정, `((말))` 은 빨간 동그라미, `{^}` 는 띄어쓰기(∨) 표시, `{~}` 는 붙이기(⁀) 표시 */
   body: string[];
   /** 교수님의 빨간 펜 코멘트 */
   notes?: string[];
@@ -241,7 +241,7 @@ export interface PaperPage {
 
 /** 교정 표시 문법을 DOM으로 바꾼다 */
 function paintRichText(parent: HTMLElement, text: string) {
-  const re = /\{([^>{}]+)>([^{}]+)\}|\(\(([^()]+)\)\)/g;
+  const re = /\{([^>{}]+)>([^{}]+)\}|\(\(([^()]+)\)\)|\{(\^|~)\}/g;
   let last = 0;
   for (const m of text.matchAll(re)) {
     const idx = m.index ?? 0;
@@ -255,6 +255,11 @@ function paintRichText(parent: HTMLElement, text: string) {
       em.textContent = m[2];
       fix.append(s, em);
       parent.append(fix);
+    } else if (m[4] !== undefined) {
+      // 띄어쓰기 교정 부호: ^ 는 사이를 벌려 ∨ 표시, ~ 는 원래 있던 빈칸을 ⁀ 로 이어 붙인다
+      const mark = document.createElement('span');
+      mark.className = m[4] === '^' ? 'mark-space' : 'mark-join';
+      parent.append(mark);
     } else {
       const c = document.createElement('span');
       c.className = 'circle';
@@ -305,9 +310,17 @@ class PaperViewer {
           sheet.append(n);
         }
         if (page.sign) {
+          // 이름은 빨간 글씨 대신 도장(낙관)으로 찍는다: 글자를 2x2 칸에 나눠 새긴다
           const s = document.createElement('div');
           s.className = 'sign';
-          s.textContent = page.sign;
+          const stamp = document.createElement('div');
+          stamp.className = 'stamp';
+          for (const ch of [...page.sign].slice(0, 4)) {
+            const c = document.createElement('span');
+            c.textContent = ch;
+            stamp.append(c);
+          }
+          s.append(stamp);
           sheet.append(s);
         }
         sheet.scrollTop = 0;
@@ -376,7 +389,7 @@ export const paperViewer = new PaperViewer();
 const CREDIT_BLOCKS: string[] = [
   '교수님, 총장 취임을 축하드립니다!',
   '오래전 702호 문을 두드리던 저희가\n오늘은 작은 캠퍼스를 만들어 다시 찾아왔습니다.',
-  '{{MADE WITH LOVE}}\n기획 노현서 · 개발 정순원\n그리고 오늘 함께한 창현, 태진',
+  '{{A LITTLE GIFT, 20 YEARS IN THE MAKING}}\n기획 노현서 · 개발 정순원\n그리고 오늘 함께한 창현, 태진',
   '{{MUSIC}}\n바흐 · 슈만 · 쇼팽 · 파헬벨\n연주: Musopen(Donald Betts 외), Kimiko Ishizaka(CC0),\n미 공군 악단 (모두 퍼블릭 도메인)',
   '{{THE FINAL MOMENT}}\n{{2006 → 2026}}',
   '20년 전, 교수님과 저희의 이야기가 시작되었습니다.\n그리고 오늘, 교수님의 새로운 시작을 축하합니다.',

@@ -122,6 +122,9 @@ export const CUTSCENES: Record<string, CutStep[]> = {
     { type: 'card', card: 'board_note' },
     { type: 'card', card: 'board_note_changhyun' },
     { type: 'card', card: 'board_note_hyeyoung' },
+    { type: 'card', card: 'board_note_jiun' },
+    { type: 'card', card: 'board_note_seunghong' },
+    { type: 'card', card: 'board_note_sueon' },
     { type: 'card', card: 'board_note_chick' },
   ],
 
