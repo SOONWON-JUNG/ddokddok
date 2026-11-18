@@ -1159,6 +1159,21 @@ export class WorldScene extends Phaser.Scene {
   private async airplaneWave(id: string, swings: number) {
     const a = this.actorOf(id);
     a.setFrame('down_0');
+    // 원래 그림에 붙어 있는 팔을 지운 몸통 그림으로 바꿔서, 팔이 4개로 보이지 않게 한다
+    const key = a.texture.key;
+    const bare = `${key}_noarm`;
+    if (!this.textures.exists(bare)) {
+      const fr = a.frame;
+      const cv = this.textures.createCanvas(bare, fr.cutWidth, fr.cutHeight);
+      if (cv) {
+        const g = cv.getContext();
+        g.drawImage(fr.source.image as CanvasImageSource, fr.cutX, fr.cutY, fr.cutWidth, fr.cutHeight, 0, 0, fr.cutWidth, fr.cutHeight);
+        g.clearRect(3, 16, 4, 15); // 왼팔 (몸통은 x=7부터)
+        g.clearRect(19, 16, 4, 15); // 오른팔 (몸통은 x=18까지)
+        cv.refresh();
+      }
+    }
+    a.setTexture(bare);
     const sc = a.scaleX;
     const baseY = a.y;
     const sx = 6 * sc;
@@ -1197,6 +1212,7 @@ export class WorldScene extends Phaser.Scene {
     });
     L.destroy();
     R.destroy();
+    a.setTexture(key, 'down_0');
     for (let k = 0; k < 2; k++) {
       await new Promise<void>((resolve) =>
         this.tweens.add({ targets: a, y: baseY - 5, duration: 130, yoyo: true, onComplete: () => resolve() }),
